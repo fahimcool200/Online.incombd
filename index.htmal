@@ -1,185 +1,434 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COINZY Real-Time - v3.2</title> <!-- Version Updated -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Trusted Income 360 BD</title>
+    
+    <!-- Telegram Web App Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- Basic Reset & Body --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background-color: #f4f7f6; width: 100%; overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh; color: #333; }
+        :root {
+            --bg-gradient: linear-gradient(135deg, #05070a 0%, #1a1f35 100%);
+            --primary: #00f3ff;
+            --secondary: #7000ff;
+            --text-main: #ffffff;
+            --danger: #ff2a6d;
+            --font-main: 'Poppins', sans-serif;
+        }
 
-        /* --- Login Page Style --- */
-        #auth-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; background: #fff; }
-        .auth-form { background: #fff; padding: 30px 25px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); width: 100%; max-width: 380px; text-align: center; }
-        #forgot-password-form { display: none; }
-        .auth-form h2 { margin-bottom: 25px; color: #2c3e50; font-weight: 600; font-size: 1.7em; }
-        .auth-form .form-group { margin-bottom: 18px; text-align: left; }
-        .auth-form label { display: block; margin-bottom: 6px; font-weight: 500; color: #555; font-size: 0.9em; }
-        .auth-form input[type="email"], .auth-form input[type="password"] { width: 100%; padding: 12px 14px; border: 1px solid #dce4ec; border-radius: 6px; font-size: 1em; box-sizing: border-box; }
-        .auth-form input:focus { border-color: #1e90ff; outline: none; }
-        .auth-form button.btn-login { width: 100%; padding: 12px; border: none; border-radius: 6px; background-color: #1e90ff; color: white; font-size: 1.05em; font-weight: 500; cursor: pointer; transition: background-color 0.3s; margin-top: 10px; }
-        .auth-form button.btn-login:hover { background-color: #1c86ee; }
-        .auth-toggle-link { margin-top: 20px; font-size: 0.95em; color: #555; }
-        .auth-toggle-link a { color: #1e90ff; text-decoration: none; font-weight: 500; cursor: pointer;}
-        .auth-toggle-link a:hover { text-decoration: underline; }
-        .forgot-password-link { text-align: right; font-size: 0.9em; margin-top: 5px; margin-bottom: 15px; }
-        .forgot-password-link a { color: #6c757d; text-decoration: none; cursor: pointer; }
-        .forgot-password-link a:hover { color: #1e90ff; text-decoration: underline; }
-        #googleSignInBtn, #googleSignUpBtn { background-color: #f8f9fa; color: #444; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; border: 1px solid #dce4ec; width: 100%; padding: 11px; border-radius: 6px; font-size: 1em; transition: background-color 0.3s; }
-        #googleSignInBtn:hover, #googleSignUpBtn:hover { background-color: #f1f3f5; }
-        #googleSignInBtn svg, #googleSignUpBtn svg { width: 18px; height: 18px; }
-        .auth-separator { text-align: center; border-bottom: 1px solid #e0e0e0; line-height: 0.1em; margin: 20px 0; }
-        .auth-separator span { background: #fff; padding: 0 15px; color: #aaa; font-size: 0.9em;}
-        #auth-message-global { margin-top: 20px; font-weight: bold; min-height: 20px; text-align: center; }
-        .message-area { min-height: 45px; margin-top: 15px; font-weight: 500; font-size: 0.95em; }
-        .error-message { color: #e74c3c; background-color: #fadbd8; border: 1px solid #f1c4c0; padding: 12px; border-radius: 6px; margin: 10px 0; text-align: center; display: none; }
-        .success-message { color: #1e8449; background-color: #d4efdf; border: 1px solid #a9dfbf; padding: 12px; border-radius: 6px; margin: 10px 0; text-align: center; display: none; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body {
+            margin: 0; padding: 0; width: 100vw; height: 100vh;
+            background: var(--bg-gradient); font-family: var(--font-main);
+            color: var(--text-main); overflow: hidden;
+            display: flex; flex-direction: column; align-items: center;
+        }
 
-        /* --- App Container & Header --- */
-        #app-container { display: none; flex-direction: column; min-height: 100vh; width: 100%; background-color: #fff; }
-        header { width: 100%; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 100; }
-        .header-left { display: flex; align-items: center; gap: 10px; flex-grow: 1; }
-        header img#appLogo { height: 30px; border-radius: 6px; background-color: #eee;}
-        #welcomeMessageContainer { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: 5px;}
-        #welcomeMessage { font-size: 1.1em; color: #333; font-weight: 500; display: none; }
-        img#headerProfilePic { height: 35px; width: 35px; border-radius: 50%; object-fit: cover; cursor: pointer; margin-left: auto; margin-right: 10px; background-color: #eee; border: 1px solid #ddd; }
-        .header-right { display: flex; align-items: center; gap: 15px; flex-shrink: 0; }
-        .menu-icon { font-size: 24px; cursor: pointer; padding: 5px; line-height: 1; position: relative; color: #555; }
-        .dropdown-menu { display: none; position: absolute; top: 45px; right: 10px; background-color: white; min-width: 160px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1); z-index: 101; border-radius: 8px; overflow: hidden; border: 1px solid #eee;}
-        .dropdown-menu a { color: #333; padding: 10px 15px; text-decoration: none; display: block; font-size: 14px; cursor: pointer; }
-        .dropdown-menu a:hover { background-color: #f1f3f5; }
-        #logoutButton { color: #e74c3c; font-weight: 500; cursor: pointer; }
-        #logoutButton:hover { background-color: #ff6b6b1a; }
-        .coin-box { background: #ffeaa7; color: #a0522d; border: 1px solid #f9e79f; padding: 6px 12px; border-radius: 20px; font-weight: 600; white-space: nowrap; order: 2; font-size: 0.95em; }
-        #coin-balance { font-weight: 700; }
+        /* User Info Bar */
+        .user-bar {
+            width: 100%; padding: 10px; background: rgba(0,0,0,0.3);
+            text-align: center; font-size: 12px; color: var(--primary);
+            position: absolute; top: 0; left: 0; z-index: 20;
+        }
 
-        /* --- Main & Pages --- */
-        main { flex-grow: 1; width: 100%; padding: 15px; background-color: #f4f7f6; }
-        .page { display: none; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.3s; }
-        .page.active-page { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        /* --- Home Page --- */
-        .banner { width: 100%; max-width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 25px; background-color: #eee; min-height: 150px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
-        .banner img#bannerImage { max-width: 100%; display: block; height: auto; }
-        .home-actions { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 550px; margin: 0 auto; padding: 0 5px;}
-        .action-card { background: #fff; padding: 18px 15px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: transform 0.2s ease, box-shadow 0.2s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.07); cursor: pointer; text-align: center; border: 1px solid #e9ecef; }
-        .action-card:hover { transform: translateY(-3px); box-shadow: 0 5px 12px rgba(0,0,0,0.09); }
-        .action-card i { font-style: normal; font-size: 28px; color: #fff; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-bottom: 10px; }
-        .action-card span { font-weight: 500; font-size: 1.05em; color: #333; }
-        .action-card i.icon-earn { background-color: #ffab00; } .action-card i.icon-ads { background-color: #00b0ff; } .action-card i.icon-bonus { background-color: #e53935; } .action-card i.icon-history { background-color: #8e44ad; } .action-card i.icon-withdraw { background-color: #2ecc71; } .action-card i.icon-refer { background-color: #f39c12; }
-        #adCooldownTimer { font-size: 0.85em; color: #e74c3c; margin-top: 5px; font-weight: 500; min-height: 1em; }
-        #adCooldownTimer.ready { color: #27ae60; font-weight: 600; }
+        /* Header */
+        .app-header { width: 100%; padding: 50px 20px 10px; display: flex; justify-content: center; z-index: 10; }
+        .tg-btn {
+            background: rgba(255, 255, 255, 0.1); border: 1px solid var(--primary);
+            color: var(--primary); padding: 10px 25px; border-radius: 50px;
+            text-decoration: none; font-weight: 600; font-size: 14px;
+            display: flex; align-items: center; gap: 10px; backdrop-filter: blur(5px);
+        }
 
-        /* --- Other Pages (Common) --- */
-        .page-content-container { width: 100%; max-width: 600px; padding: 15px 5px; margin-left: auto; margin-right: auto; }
-        .section-title { text-align: center; margin-bottom: 25px; font-size: 1.4em; color: var(--heading-color); font-weight: 600; }
-        .loading-indicator { text-align: center; padding: 20px; font-style: italic; color: #666; }
-        .back-btn { display: inline-block; width: auto; text-align: center; color: #007bff; border: 1px solid #007bff; background: #fff; border-radius: 25px; padding: 8px 25px; margin: 25px auto 0; font-size: 0.95em; font-weight: 500; cursor: pointer; transition: all 0.3s ease; }
-        .back-btn:hover { background: #007bff; color: white; }
-         input[type="text"], input[type="number"], input[type="url"], select, textarea, input[type="file"] { padding: 11px 14px; border: 1px solid #ccc; border-radius: 6px; width: 100%; margin-top: 5px; font-size: 1em; box-sizing: border-box; }
-         input[type="file"] { padding: 8px; background: #eee; cursor: pointer;}
-         .info-card { background: #eef2f7; border: 1px solid #e0e6ed; color: #555; border-radius: 8px; padding: 15px; margin-bottom: 20px; width: 100%; text-align: center; font-size: 1em; }
-         .form-group { width: 100%; margin-bottom: 18px; }
-         .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #555; }
-         #withdrawAmountDisplay { margin-left: 10px; font-size: 0.9em; color: var(--secondary-color); font-weight: 500;}
-        /* Earn Page */
-        .earn-section { background: #fff; border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center; border: 1px solid #e9ecef; }
-        .earn-section h3 { margin-top: 0; margin-bottom: 10px; color: #0056b3; font-size: 1.2em; }
-        .earn-section p { font-size: 0.95em; color: #666; margin-bottom: 15px; }
-        .earn-section button { margin-top: 10px; }
-        .earn-timer { font-size: 0.9em; color: #e74c3c; margin-top: 10px; min-height: 1.3em; font-weight: 500; }
-        .earn-timer.ready { color: #27ae60; font-weight: 600; }
-        #tasks-list { width: 100%; display: flex; flex-direction: column; gap: 15px; margin-top: 25px; }
-        .task-card { background: #ffffff; border-radius: 10px; padding: 15px; margin-bottom: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.07); display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s; width: 100%; flex-wrap: wrap; gap: 10px; border: 1px solid #eee; }
-        .task-card:hover { transform: scale(1.01); background-color: #f8f9fa; }
-        .task-info { font-size: 1em; flex-grow: 1; }
-        .task-info .task-title { font-weight: 600; margin-bottom: 4px; display: block; color: #333;}
-        .task-info .task-description { font-size: 0.9em; color: #666; display: block; margin-bottom: 6px; }
-        .task-info .task-reward { font-size: 0.95em; color: var(--success-color); font-weight: 500; }
-        .task-action { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
-        .earn-btn { border: 1px solid #007bff; background: none; color: #007bff; border-radius: 6px; padding: 7px 15px; cursor: pointer; transition: all 0.3s; font-weight: 500; white-space: nowrap; font-size: 0.9em;}
-        .earn-btn.primary { background-color: #007bff; color: white; }
-        .earn-btn.primary:hover { background-color: #0056b3; border-color: #0056b3; }
-        .earn-btn:hover:not(:disabled) { background: #007bff; color: white; }
-        .earn-btn:disabled { border-color: #ccc; color: #ccc; cursor: not-allowed; background: #f0f0f0; }
-        .timer-display { font-size: 0.85em; color: #e74c3c; min-height: 15px; text-align: right; font-weight: 500;}
-        .timer-display.ready { color: #27ae60; }
-        .task-proof-upload { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee; text-align: left;}
-        .task-proof-upload label { font-size: 0.9em; font-weight: 500; }
-        .task-proof-upload input[type="file"] { margin-top: 5px; font-size: 0.9em; display: block; }
-        .task-proof-upload button { margin-top: 10px; font-size: 0.9em; padding: 5px 12px; }
-        /* Spin Wheel */
-        .spin-wheel-container { position: relative; width: 250px; height: 250px; margin: 30px auto; user-select: none; }
-        #spinWheel { width: 100%; height: 100%; border: 10px solid #fff; box-shadow: 0 0 20px rgba(0,0,0,0.1); border-radius: 50%; position: relative; overflow: hidden; background: conic-gradient( #ff6b6b 0% 20%, #feca57 20% 40%, #1dd1a1 40% 60%, #48dbfb 60% 80%, #54a0ff 80% 100% ); transition: transform 6s cubic-bezier(0.25, 1, 0.5, 1); }
-        .spin-wheel-container::after { content: '▶'; position: absolute; top: 50%; right: -15px; transform: translateY(-50%) rotate(0deg); font-size: 28px; color: #2c3e50; text-shadow: none; }
-        #dailySpinResult { margin-top: 20px; font-weight: bold; font-size: 1.2em; color: var(--primary-color); min-height: 1.4em;}
-        /* History Page */
-        #history-list { width: 100%; margin-top: 10px; display: flex; flex-direction: column; gap: 10px; min-height: 50px; }
-        .history-item { background: #fff; border-radius: 8px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.06); display: flex; flex-direction: column; gap: 8px; font-size: 14px; border: 1px solid #eee;}
-        .history-item-details { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px; align-items: center;}
-        .history-item-info { color: #555; font-size: 0.95em; }
-        .history-item-amount { font-weight: 600; color: #333; }
-        .history-item-status { font-weight: 600; padding: 4px 10px; border-radius: 15px; font-size: 0.85em; text-align: center; text-transform: capitalize; border: 1px solid transparent; }
-        .status-pending { border-color: #ffecb3; background-color: #fff9e6; color: #ffa000; } .status-approved { border-color: #c8e6c9; background-color: #eafaf1; color: #2e7d32; } .status-rejected { border-color: #ffcdd2; background-color: #fbebec; color: #c62828; }
-        .history-item .timestamp { font-size: 0.85em; color: #888; margin-top: 5px; }
-        #history-message-area { width: 100%; margin-top: 10px; }
-        /* Referral Page */
-        .referral-link-box { background-color: #e9ecef; border: 1px solid #dce4ec; padding: 20px; border-radius: 8px; text-align: center; margin: 15px 0; word-wrap: break-word; }
-        #referralLinkDisplay { font-size: 1.2em; font-weight: bold; color: #0056b3; display: block; margin-bottom: 15px; font-family: 'Courier New', Courier, monospace; min-height: 1.2em; background: #fff; border-radius: 4px; padding: 8px 10px; border: 1px dashed #adb5bd;}
-        #copyLinkBtn { padding: 8px 18px; font-size: 14px; }
-        .referral-stats p { margin-bottom: 8px; font-size: 1.1em; }
-        .referral-stats strong { color: #007bff; }
-        .enter-referral-code-section { margin-top: 25px; padding: 20px; background-color: #eaf1ff; border: 1px solid #c5d7ff; border-radius: 8px; text-align: center; }
-        .enter-referral-code-section.hidden { display: none; }
-        .enter-referral-code-section label { display: block; margin-bottom: 8px; font-weight: 500; color: #333; }
-        #enteredReferralCodeInput { width: 100%; max-width: 280px; padding: 10px 12px; margin: 0 auto 15px auto; border: 1px solid #adb5bd; border-radius: 6px; display: block; }
-        #submitReferralCodeBtn { padding: 10px 25px; font-size: 1em; background-color: #28a745; color: white; cursor: pointer; border: none; border-radius: 6px;}
-        #submitReferralCodeBtn:hover { background-color: #218838; }
-        #referralCodeMessage { font-size: 0.9em; margin-top: 15px; color: #555; font-weight: bold;}
-        /* Settings Page Specific */
-        #profilePicPreview { display: block; width: 110px; height: 110px; border-radius: 50%; object-fit: cover; margin: 15px auto 20px; border: 4px solid #fff; background-color: #eee; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-        #settings-form label { font-size: 0.95em; }
-        #settings-form .form-group { margin-bottom: 25px; }
-        #settingsSaveBtn { background-color: #28a745; color: white; width: 100%; padding: 12px; font-size: 1.05em; }
-        #settingsSaveBtn:hover { background-color: #218838; }
-        #settingsSaveBtn:disabled { background-color: #ccc; cursor: not-allowed; }
-        #deleteAccountBtn { background-color: transparent; color: var(--danger-color); border: 1px solid var(--danger-color); width: 100%; padding: 10px; font-size: 0.95em; margin-top: 20px; }
-        #deleteAccountBtn:hover { background-color: var(--danger-color); color: white; }
-        .user-info { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
-        .user-info p { margin-bottom: 5px; font-size: 0.95em; color: #555; word-break: break-all; }
-        .user-info strong { color: #333; }
-        /* Content Pages */
-        .content-page { background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); width: 100%; max-width: 600px; margin-top: 10px; border: 1px solid #eee;}
-        .content-page h3 { margin-bottom: 20px; color: #0056b3; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .content-page p, .content-page ul { margin-bottom: 15px; line-height: 1.7; color: #555; font-size: 0.95em;}
-        .content-page ul { list-style-type: disc; list-style-position: inside; padding-left: 5px; }
-        .content-page li { margin-bottom: 8px;}
-        .content-page h4 { margin-top: 20px; margin-bottom: 8px; color: #333; font-weight: 600;}
-        .content-page a { color: #3498db; text-decoration: none;}
-        .content-page a:hover { text-decoration: underline;}
-        /* Ad Modal Styles */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 15px; }
-        .modal-content { background-color: white; padding: 25px; border-radius: 8px; max-width: 95%; width: auto; min-width: 300px; max-height: 85vh; overflow-y: auto; position: relative; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
-        .modal-close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 26px; cursor: pointer; color: #aaa; line-height: 1; padding: 0;}
-        .modal-close-btn:hover { color: #333; }
-        #adContent { margin-top: 20px; min-height: 100px; display: flex; justify-content: center; align-items: center; border: 1px dashed #eee; background: #f9f9f9; }
-        #adContent iframe { max-width: 100%; }
-        #adMessage { margin-top: 15px; }
-        /* Footer */
-        .footer { width: 100%; padding: 15px 0; text-align: center; color: #888; font-size: 14px; margin-top: auto; background: #fff; border-top: 1px solid #eee;}
-        /* Responsive */
-        @media (max-width: 480px) { .home-actions { max-width: 100%; padding: 0 5px; gap: 10px;} .action-card { padding: 15px 12px; gap: 6px; } .action-card i { width: 40px; height: 40px; font-size: 22px; } .action-card span { font-size: 0.95em; } header { padding: 8px 12px; } .header-right { gap: 8px; } .coin-box { padding: 6px 10px; font-size: 13px; } img#headerProfilePic { height: 30px; width: 30px; margin-right: 5px;} .dropdown-menu { right: 5px; } main { padding: 10px 5px; } .auth-form { padding: 25px 20px; } #enteredReferralCodeInput { max-width: none; width: 80%; } #submitReferralCodeBtn { width: 60%; max-width: 180px; } }
+        /* Wheel */
+        .game-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; width: 100%; }
+        
+        .wheel-wrapper {
+            position: relative; width: 320px; height: 320px; border-radius: 50%; padding: 10px;
+            background: conic-gradient(from 0deg, var(--secondary), var(--primary), var(--secondary));
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.15);
+        }
 
+        .wheel-inner { width: 100%; height: 100%; border-radius: 50%; background: #000; position: relative; overflow: hidden; border: 5px solid #000; }
+        canvas { display: block; width: 100%; height: 100%; }
+
+        .marker {
+            position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+            width: 40px; height: 50px; z-index: 5; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+        }
+        .marker::before {
+            content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+            border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 35px solid #fff;
+        }
+
+        /* Controls */
+        .controls-area { width: 100%; padding: 30px; display: flex; justify-content: center; z-index: 10; position: relative;}
+        .spin-btn {
+            background: var(--primary); color: #000; border: none; width: 100%; max-width: 300px;
+            padding: 18px; font-family: var(--font-main); font-size: 20px; font-weight: 800;
+            text-transform: uppercase; border-radius: 12px; cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2); transition: transform 0.1s;
+        }
+        .spin-btn:active { transform: scale(0.96); }
+        .spin-btn:disabled { background: #333; color: #666; box-shadow: none; cursor: not-allowed; }
+
+        .timer-text { position: absolute; bottom: 85px; font-size: 14px; color: var(--danger); font-weight: 600; display: none; }
+
+        /* Admin Trigger */
+        .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.3; font-size: 20px; cursor: pointer; z-index: 100; }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(5px);
+            display: none; align-items: center; justify-content: center; z-index: 200;
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal-content {
+            background: #151a27; border: 2px solid var(--primary); width: 90%; max-width: 350px;
+            padding: 25px; border-radius: 15px; text-align: center; color: #fff;
+            max-height: 90vh; overflow-y: auto;
+        }
+        
+        input, textarea { width: 100%; padding: 10px; margin: 5px 0 15px; background: #05070a; border: 1px solid #333; color: #fff; border-radius: 5px; }
+        
+        .modal-btn { background: var(--primary); color: #000; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; }
+        .modal-btn.close { background: #333; color: #fff; margin-top: 5px; }
     </style>
 </head>
 <body>
-    <!-- Authentication Container and Main App Container HTML (from previous full response) -->
-    <!-- ... (HTML code from previous response, starting from <div id="
+
+    <!-- User Info Display -->
+    <div id="userInfo" class="user-bar">Logging in...</div>
+
+    <div class="app-header">
+        <a href="#" id="tg-link-btn" class="tg-btn" target="_blank">
+            <i class="fab fa-telegram-plane"></i> Join Channel
+        </a>
+    </div>
+
+    <div class="game-container">
+        <div class="wheel-wrapper">
+            <div class="marker"></div>
+            <div class="wheel-inner">
+                <canvas id="wheelCanvas" width="600" height="600"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls-area">
+        <div id="timerDisplay" class="timer-text">Next Spin: 24h 00m</div>
+        <!-- Fixed: Added onclick event directly -->
+        <button id="spinBtn" class="spin-btn" onclick="spin()">SPIN TO WIN</button>
+    </div>
+
+    <!-- Admin Trigger Icon -->
+    <div class="admin-trigger" onclick="openAdminLogin()">⚙️</div>
+
+    <!-- Result Modal -->
+    <div id="resultModal" class="modal-overlay">
+        <div class="modal-content">
+            <h1 id="resIcon" style="font-size: 50px; margin: 0;">🎉</h1>
+            <h2 id="resTitle">Winner!</h2>
+            <p id="resText">You won!</p>
+            <button class="modal-btn" onclick="closeResultModal()">OK</button>
+        </div>
+    </div>
+
+    <!-- Admin Login -->
+    <div id="adminLoginModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Admin Login</h3>
+            <input type="password" id="adminPass" placeholder="Enter Password">
+            <button class="modal-btn" onclick="checkAdminPass()">Login</button>
+            <button class="modal-btn close" onclick="document.getElementById('adminLoginModal').classList.remove('active')">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanelModal" class="modal-overlay">
+        <div class="modal-content" style="text-align: left;">
+            <h3 style="text-align: center; margin-top:0;">Admin Panel</h3>
+            
+            <p style="text-align:center; font-size:12px; color:#aaa;">Global Winners: <span id="admTotalWins">0</span> / 10</p>
+            <hr style="border-color: #333">
+
+            <label>Prize Text</label>
+            <input type="text" id="cfgPrize">
+
+            <label>Telegram Link</label>
+            <input type="text" id="cfgLink">
+
+            <label>Win Chance (0.5 = 50%)</label>
+            <input type="number" step="0.05" id="cfgChance">
+            
+            <label>Bot Token</label>
+            <input type="text" id="cfgBotToken">
+            
+            <label>Chat ID</label>
+            <input type="text" id="cfgChatID">
+
+            <button class="modal-btn" style="background: #444; color: #fff;" onclick="resetMyCooldown()">Reset My Timer (Test)</button>
+
+            <label style="display:block; margin-top:10px;">Full Config JSON</label>
+            <textarea id="jsonArea" rows="3"></textarea>
+            <button class="modal-btn" style="background: var(--secondary); color:#fff" onclick="importJson()">Import JSON</button>
+
+            <button class="modal-btn" onclick="saveAdminSettings()">SAVE SETTINGS</button>
+            <button class="modal-btn close" onclick="document.getElementById('adminPanelModal').classList.remove('active')">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // ================= TELEGRAM USER DATA =================
+        let currentUser = {
+            id: "Unknown",
+            username: "Guest",
+            first_name: "Guest"
+        };
+
+        const tg = window.Telegram.WebApp;
+        tg.expand(); 
+
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            currentUser = tg.initDataUnsafe.user;
+            document.getElementById('userInfo').innerText = `Logged in as: ${currentUser.first_name} (@${currentUser.username || 'NoUsername'})`;
+        } else {
+            document.getElementById('userInfo').innerText = "Running outside Telegram (Guest Mode)";
+        }
+
+        // ================= CONFIG & STATE =================
+        const DEFAULT_CONFIG = {
+            prizeText: "0.05 USDT",
+            telegramLink: "https://t.me/TrustedIncome360BD",
+            winChance: 0.3,
+            maxWinners: 10,
+            botToken: "8268506010:AAHNsIBpPWzbK37cb5g8x8_1IXf1vHem6DM", 
+            adminChatId: "5223267506",
+            globalWinCount: 0 
+        };
+        const ADMIN_PASS = "SA20052@";
+
+        let config = JSON.parse(localStorage.getItem('spin_config')) || DEFAULT_CONFIG;
+        let lastSpinTime = parseInt(localStorage.getItem('spin_last_time')) || 0;
+        const COOLDOWN_MS = 24 * 60 * 60 * 1000; 
+
+        // ================= ENGINE =================
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spinBtn');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const tgLinkBtn = document.getElementById('tg-link-btn');
+        
+        tgLinkBtn.href = config.telegramLink;
+
+        const slices = 8;
+        const radius = canvas.width / 2;
+        const arc = (2 * Math.PI) / slices;
+        let ang = 0;
+        let isSpinning = false;
+
+        function drawWheel() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for(let i=0; i<slices; i++) {
+                const angStart = ang + (i * arc);
+                const angEnd = ang + ((i + 1) * arc);
+                const isWinSlice = (i % 2 === 0); 
+                
+                ctx.beginPath();
+                ctx.moveTo(radius, radius);
+                ctx.arc(radius, radius, radius, angStart, angEnd);
+                ctx.fillStyle = isWinSlice ? '#00f3ff' : '#1e2538';
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.save();
+                ctx.translate(radius, radius);
+                ctx.rotate(angStart + arc / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = isWinSlice ? '#000' : '#fff';
+                ctx.font = "bold 24px Poppins";
+                const label = isWinSlice ? config.prizeText : "Try Again";
+                ctx.fillText(label, radius - 20, 10);
+                ctx.restore();
+            }
+        }
+
+        // ================= GAME LOGIC =================
+        function checkStatus() {
+            const now = Date.now();
+            
+            // Limit Check
+            if (config.globalWinCount >= config.maxWinners) {
+                disableGame("Giveaway Ended", "Limit Reached");
+                return;
+            }
+
+            // Cooldown Check
+            if (now - lastSpinTime < COOLDOWN_MS) {
+                const remaining = COOLDOWN_MS - (now - lastSpinTime);
+                const hrs = Math.floor(remaining / (1000 * 60 * 60));
+                const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                
+                spinBtn.disabled = true;
+                spinBtn.innerText = "COME BACK LATER";
+                timerDisplay.style.display = 'block';
+                timerDisplay.innerText = `Next Spin: ${hrs}h ${mins}m`;
+            } else {
+                spinBtn.disabled = false;
+                spinBtn.innerText = "SPIN TO WIN";
+                timerDisplay.style.display = 'none';
+            }
+            drawWheel();
+        }
+
+        function disableGame(btnText, alertText) {
+            spinBtn.disabled = true;
+            spinBtn.innerText = btnText;
+            spinBtn.style.background = "#333";
+        }
+
+        function spin() {
+            if (isSpinning) return;
+            isSpinning = true;
+            spinBtn.disabled = true;
+
+            // Logic
+            let isWin = Math.random() < config.winChance;
+            if (config.globalWinCount >= config.maxWinners) isWin = false;
+
+            // Target Index
+            let targetIndex;
+            if(isWin) {
+                const possible = [0, 2, 4, 6];
+                targetIndex = possible[Math.floor(Math.random() * possible.length)];
+            } else {
+                const possible = [1, 3, 5, 7];
+                targetIndex = possible[Math.floor(Math.random() * possible.length)];
+            }
+
+            // Calc Angles
+            const sliceDeg = 360 / slices;
+            const stopAngle = -(targetIndex * sliceDeg) - (sliceDeg / 2) - 90; 
+            const totalRot = (360 * 6) + stopAngle; 
+
+            let start = null;
+            const duration = 4000;
+            const startAng = ang * 180 / Math.PI;
+
+            function animate(time) {
+                if (!start) start = time;
+                const progress = Math.min((time - start) / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 3);
+                
+                ang = (startAng + (totalRot - startAng) * ease) * Math.PI / 180;
+                drawWheel();
+
+                if (progress < 1) requestAnimationFrame(animate);
+                else endSpin(isWin);
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function endSpin(isWin) {
+            isSpinning = false;
+            lastSpinTime = Date.now();
+            localStorage.setItem('spin_last_time', lastSpinTime);
+            
+            if (isWin) {
+                config.globalWinCount++;
+                localStorage.setItem('spin_config', JSON.stringify(config));
+                
+                document.getElementById('resIcon').innerText = "🎉";
+                document.getElementById('resTitle').innerText = "CONGRATULATIONS!";
+                document.getElementById('resTitle').style.color = "#00f3ff";
+                document.getElementById('resText').innerText = `You won ${config.prizeText}! Screenshot this!`;
+                
+                sendTelegramAlert(config.prizeText);
+            } else {
+                document.getElementById('resIcon').innerText = "😢";
+                document.getElementById('resTitle').innerText = "Try Again";
+                document.getElementById('resTitle').style.color = "#ff2a6d";
+                document.getElementById('resText').innerText = "Better luck next time!";
+            }
+            
+            document.getElementById('resultModal').classList.add('active');
+            checkStatus();
+        }
+
+        function closeResultModal() {
+            document.getElementById('resultModal').classList.remove('active');
+        }
+
+        function sendTelegramAlert(prize) {
+            if (!config.botToken || !config.adminChatId) return;
+            const userLink = currentUser.username ? `@${currentUser.username}` : `[${currentUser.first_name}](tg://user?id=${currentUser.id})`;
+            const msg = `🎰 *NEW WINNER!* 🎰\n\n👤 *User:* ${currentUser.first_name}\n🆔 *UID:* \`${currentUser.id}\`\n🔗 *Username:* ${userLink}\n\n🏆 *Prize:* ${prize}\n📊 *Total Winners:* ${config.globalWinCount}`;
+            const url = `https://api.telegram.org/bot${config.botToken}/sendMessage?chat_id=${config.adminChatId}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`;
+            fetch(url).catch(err => console.log("Offline"));
+        }
+
+        function openAdminLogin() { document.getElementById('adminLoginModal').classList.add('active'); }
+
+        function checkAdminPass() {
+            const pass = document.getElementById('adminPass').value;
+            if (pass === ADMIN_PASS) {
+                document.getElementById('adminLoginModal').classList.remove('active');
+                openAdminPanel();
+            } else {
+                alert('Wrong Password!');
+            }
+        }
+
+        function openAdminPanel() {
+            document.getElementById('adminPanelModal').classList.add('active');
+            document.getElementById('cfgPrize').value = config.prizeText;
+            document.getElementById('cfgLink').value = config.telegramLink;
+            document.getElementById('cfgChance').value = config.winChance;
+            document.getElementById('cfgBotToken').value = config.botToken;
+            document.getElementById('cfgChatID').value = config.adminChatId;
+            document.getElementById('admTotalWins').innerText = config.globalWinCount;
+            document.getElementById('jsonArea').value = JSON.stringify(config, null, 2);
+        }
+
+        function saveAdminSettings() {
+            config.prizeText = document.getElementById('cfgPrize').value;
+            config.telegramLink = document.getElementById('cfgLink').value;
+            config.winChance = parseFloat(document.getElementById('cfgChance').value);
+            config.botToken = document.getElementById('cfgBotToken').value;
+            config.adminChatId = document.getElementById('cfgChatID').value;
+            localStorage.setItem('spin_config', JSON.stringify(config));
+            tgLinkBtn.href = config.telegramLink;
+            location.reload();
+        }
+
+        function importJson() {
+            try {
+                config = JSON.parse(document.getElementById('jsonArea').value);
+                localStorage.setItem('spin_config', JSON.stringify(config));
+                alert("Imported!");
+                location.reload();
+            } catch (e) { alert("Invalid JSON"); }
+        }
+
+        function resetMyCooldown() {
+            localStorage.removeItem('spin_last_time');
+            alert("Timer Reset!");
+            checkStatus();
+        }
+
+        // Make sure button is connected in JS too
+        document.getElementById('spinBtn').addEventListener('click', spin);
+
+        // Init
+        checkStatus();
+    </script>
+</body>
+</html>
