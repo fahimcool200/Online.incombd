@@ -3,432 +3,715 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Trusted Income 360 BD</title>
-    
-    <!-- Telegram Web App Script -->
+    <title>Spin & Win BD</title>
+    <!-- Telegram Web App -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #05070a 0%, #1a1f35 100%);
+            --bg: #0d1117;
             --primary: #00f3ff;
             --secondary: #7000ff;
-            --text-main: #ffffff;
+            --text: #ffffff;
             --danger: #ff2a6d;
-            --font-main: 'Poppins', sans-serif;
+            --success: #00ff88;
+            --warning: #ffb700;
+            --telegram: #0088cc;
         }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
         body {
             margin: 0; padding: 0; width: 100vw; height: 100vh;
-            background: var(--bg-gradient); font-family: var(--font-main);
-            color: var(--text-main); overflow: hidden;
-            display: flex; flex-direction: column; align-items: center;
-        }
-
-        /* User Info Bar */
-        .user-bar {
-            width: 100%; padding: 10px; background: rgba(0,0,0,0.3);
-            text-align: center; font-size: 12px; color: var(--primary);
-            position: absolute; top: 0; left: 0; z-index: 20;
+            background: radial-gradient(circle at center, #1a1f35 0%, #05070a 100%);
+            font-family: 'Poppins', sans-serif; color: var(--text);
+            display: flex; flex-direction: column; overflow: hidden;
         }
 
         /* Header */
-        .app-header { width: 100%; padding: 50px 20px 10px; display: flex; justify-content: center; z-index: 10; }
-        .tg-btn {
-            background: rgba(255, 255, 255, 0.1); border: 1px solid var(--primary);
-            color: var(--primary); padding: 10px 25px; border-radius: 50px;
-            text-decoration: none; font-weight: 600; font-size: 14px;
-            display: flex; align-items: center; gap: 10px; backdrop-filter: blur(5px);
+        .header { padding: 15px; width: 100%; z-index: 10; display: flex; justify-content: space-between; align-items: center; position: absolute; top:0; left:0;}
+        .user-badge {
+            background: rgba(0, 243, 255, 0.1); border: 1px solid var(--primary);
+            padding: 5px 12px; border-radius: 20px; font-size: 11px; color: var(--primary);
+            backdrop-filter: blur(4px);
         }
-
-        /* Wheel */
-        .game-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; width: 100%; }
-        
-        .wheel-wrapper {
-            position: relative; width: 320px; height: 320px; border-radius: 50%; padding: 10px;
-            background: conic-gradient(from 0deg, var(--secondary), var(--primary), var(--secondary));
-            box-shadow: 0 0 50px rgba(0, 243, 255, 0.15);
+        .pool-badge {
+            background: rgba(255, 183, 0, 0.15); border: 1px solid var(--warning);
+            padding: 5px 12px; border-radius: 20px; font-size: 11px; color: var(--warning);
+            backdrop-filter: blur(4px);
         }
-
-        .wheel-inner { width: 100%; height: 100%; border-radius: 50%; background: #000; position: relative; overflow: hidden; border: 5px solid #000; }
-        canvas { display: block; width: 100%; height: 100%; }
-
-        .marker {
-            position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
-            width: 40px; height: 50px; z-index: 5; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
-        }
-        .marker::before {
-            content: ''; position: absolute; left: 50%; transform: translateX(-50%);
-            border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 35px solid #fff;
-        }
-
-        /* Controls */
-        .controls-area { width: 100%; padding: 30px; display: flex; justify-content: center; z-index: 10; position: relative;}
-        .spin-btn {
-            background: var(--primary); color: #000; border: none; width: 100%; max-width: 300px;
-            padding: 18px; font-family: var(--font-main); font-size: 20px; font-weight: 800;
-            text-transform: uppercase; border-radius: 12px; cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2); transition: transform 0.1s;
-        }
-        .spin-btn:active { transform: scale(0.96); }
-        .spin-btn:disabled { background: #333; color: #666; box-shadow: none; cursor: not-allowed; }
-
-        .timer-text { position: absolute; bottom: 85px; font-size: 14px; color: var(--danger); font-weight: 600; display: none; }
 
         /* Admin Trigger */
-        .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.3; font-size: 20px; cursor: pointer; z-index: 100; }
+        .admin-trigger {
+            position: absolute; top: 60px; right: 15px; 
+            opacity: 0.5; font-size: 24px; cursor: pointer; z-index: 200;
+            color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* Maintenance Screen */
+        .maintenance-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 7, 10, 0.98); z-index: 150;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 20px;
+        }
+        .m-icon { font-size: 60px; color: var(--warning); margin-bottom: 20px; animation: pulse 2s infinite; }
+        .m-title { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 10px; }
+        .m-desc { color: #aaa; font-size: 14px; max-width: 300px; line-height: 1.6; }
+
+        @keyframes pulse { 0% { opacity: 0.5; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0.5; transform: scale(0.95); } }
+
+        /* Wheel Section */
+        .game-area {
+            flex: 0 0 auto; display: flex; justify-content: center; align-items: center;
+            position: relative; margin-top: 60px; margin-bottom: 10px;
+        }
+        .wheel-container {
+            width: 290px; height: 290px; border-radius: 50%; padding: 6px;
+            background: conic-gradient(from 0deg, var(--secondary), var(--primary), var(--secondary));
+            box-shadow: 0 0 35px rgba(0, 243, 255, 0.2); position: relative;
+        }
+        .marker {
+            position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+            width: 40px; height: 50px; z-index: 5; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5));
+        }
+        .marker::after {
+            content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+            border-left: 18px solid transparent; border-right: 18px solid transparent; 
+            border-top: 40px solid #fff;
+        }
+        canvas { display: block; width: 100%; height: 100%; border-radius: 50%; background: #000; }
+
+        /* Controls */
+        .controls {
+            padding: 5px; width: 100%; display: flex; flex-direction: column;
+            align-items: center; z-index: 20;
+        }
+        
+        .timer-box {
+            font-size: 14px; color: var(--danger); font-weight: 700;
+            margin-bottom: 10px; height: 20px; text-shadow: 0 0 10px rgba(255, 42, 109, 0.4);
+        }
+
+        .spin-btn {
+            background: linear-gradient(90deg, var(--primary), #00c3cc); color: #000; border: none;
+            width: 80%; padding: 14px; font-size: 18px; font-weight: 800; letter-spacing: 1px;
+            border-radius: 15px; text-transform: uppercase; cursor: pointer;
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.3); transition: transform 0.1s;
+        }
+        .spin-btn:active { transform: scale(0.96); }
+        .spin-btn:disabled { background: #222; color: #555; box-shadow: none; cursor: not-allowed; }
+
+        /* Live Leaderboard */
+        .live-feed {
+            flex: 1; width: 92%; margin: 15px auto 5px; 
+            background: rgba(20, 25, 40, 0.6); border: 1px solid #333; border-radius: 12px;
+            overflow: hidden; display: flex; flex-direction: column; backdrop-filter: blur(5px);
+        }
+        .feed-header {
+            background: rgba(0,0,0,0.3); padding: 10px; font-size: 12px; font-weight: 700;
+            display: flex; justify-content: space-between; border-bottom: 1px solid #333; color: var(--primary);
+        }
+        .feed-list { flex: 1; overflow-y: auto; padding: 0; }
+        
+        .feed-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 12px;
+        }
+        .feed-user { color: #ddd; font-weight: 500; display: flex; gap: 5px; align-items: center; }
+        .feed-id { color: #666; font-size: 10px; }
+        
+        /* New Feed Styles for Time */
+        .feed-right { text-align: right; }
+        .feed-prize { font-weight: bold; display: block; }
+        .feed-time { font-size: 9px; color: #888; margin-top: 2px; }
 
         /* Modals */
-        .modal-overlay {
+        .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(5px);
-            display: none; align-items: center; justify-content: center; z-index: 200;
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center; z-index: 250;
         }
-        .modal-overlay.active { display: flex; }
+        .modal.active { display: flex; }
+        .modal-box {
+            background: #151a27; border: 1px solid #333; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            padding: 25px; border-radius: 20px; width: 90%; max-width: 380px;
+            text-align: center; max-height: 90vh; overflow-y: auto; color: #fff;
+        }
 
-        .modal-content {
-            background: #151a27; border: 2px solid var(--primary); width: 90%; max-width: 350px;
-            padding: 25px; border-radius: 15px; text-align: center; color: #fff;
-            max-height: 90vh; overflow-y: auto;
+        /* Join Modal Specifics */
+        .join-btn-link {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; padding: 12px; margin: 8px 0;
+            background: rgba(0, 136, 204, 0.15); border: 1px solid var(--telegram);
+            color: #fff; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 14px;
+        }
+        .join-btn-link:hover { background: rgba(0, 136, 204, 0.3); }
+        .verify-btn {
+            background: var(--success); color: #000; margin-top: 15px;
         }
         
-        input, textarea { width: 100%; padding: 10px; margin: 5px 0 15px; background: #05070a; border: 1px solid #333; color: #fff; border-radius: 5px; }
+        input, select {
+            width: 100%; padding: 12px; margin: 6px 0 12px;
+            background: #080a10; border: 1px solid #333; color: #fff; border-radius: 8px; font-size: 13px;
+        }
+        input:focus { border-color: var(--primary); outline: none; }
+        label { display: block; text-align: left; font-size: 11px; color: #aaa; margin-top: 5px; font-weight: 600; }
+
+        .btn-s { padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; font-size: 14px;}
+        .btn-ok { background: var(--primary); color: #000; }
+        .btn-close { background: #222; color: #fff; border: 1px solid #333; }
         
-        .modal-btn { background: var(--primary); color: #000; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; }
-        .modal-btn.close { background: #333; color: #fff; margin-top: 5px; }
+        /* Toggle Switch */
+        .toggle-box { display: flex; justify-content: space-between; align-items: center; background: #080a10; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 15px; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--warning); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
     </style>
 </head>
 <body>
 
-    <!-- User Info Display -->
-    <div id="userInfo" class="user-bar">Logging in...</div>
-
-    <div class="app-header">
-        <a href="#" id="tg-link-btn" class="tg-btn" target="_blank">
-            <i class="fab fa-telegram-plane"></i> Join Channel
-        </a>
+    <!-- Maintenance Overlay -->
+    <div id="maintenanceScreen" class="maintenance-overlay">
+        <i class="fas fa-tools m-icon"></i>
+        <div class="m-title">MAINTENANCE MODE</div>
+        <div class="m-desc">We are currently updating our reward system. Please check back later!</div>
     </div>
 
-    <div class="game-container">
-        <div class="wheel-wrapper">
+    <div class="header">
+        <span id="userInfo" class="user-badge"><i class="fas fa-user"></i> Loading...</span>
+        <span id="poolStatus" class="pool-badge"><i class="fas fa-chart-pie"></i> Pool: 0/0</span>
+    </div>
+
+    <!-- Admin Gear -->
+    <div class="admin-trigger" onclick="window.openAdminLogin()"><i class="fas fa-cog fa-spin-hover"></i></div>
+
+    <div class="game-area">
+        <div class="wheel-container">
             <div class="marker"></div>
-            <div class="wheel-inner">
-                <canvas id="wheelCanvas" width="600" height="600"></canvas>
-            </div>
+            <canvas id="wheelCanvas" width="600" height="600"></canvas>
         </div>
     </div>
 
-    <div class="controls-area">
-        <div id="timerDisplay" class="timer-text">Next Spin: 24h 00m</div>
-        <!-- Fixed: Added onclick event directly -->
-        <button id="spinBtn" class="spin-btn" onclick="spin()">SPIN TO WIN</button>
+    <div class="controls">
+        <div id="timerDisplay" class="timer-box"></div>
+        <button id="spinBtn" class="spin-btn">SPIN NOW</button>
     </div>
 
-    <!-- Admin Trigger Icon -->
-    <div class="admin-trigger" onclick="openAdminLogin()">⚙️</div>
+    <!-- Live Leaderboard -->
+    <div class="live-feed">
+        <div class="feed-header">
+            <span><i class="fas fa-broadcast-tower"></i> LIVE WINNERS</span>
+        </div>
+        <div id="feedList" class="feed-list">
+            <div style="text-align:center; padding:15px; color:#555; font-size:12px;">Waiting for spins...</div>
+        </div>
+    </div>
 
-    <!-- Result Modal -->
-    <div id="resultModal" class="modal-overlay">
-        <div class="modal-content">
-            <h1 id="resIcon" style="font-size: 50px; margin: 0;">🎉</h1>
-            <h2 id="resTitle">Winner!</h2>
-            <p id="resText">You won!</p>
-            <button class="modal-btn" onclick="closeResultModal()">OK</button>
+    <!-- Join Required Modal -->
+    <div id="modalJoin" class="modal">
+        <div class="modal-box">
+            <h2 style="color: var(--primary); margin-top:0;">🚀 JOIN TO SPIN</h2>
+            <p style="font-size: 13px; color: #ccc;">You must join our channels to participate in the giveaway.</p>
+            
+            <a id="btnChannel" href="#" target="_blank" class="join-btn-link">
+                <i class="fab fa-telegram-plane"></i> Join Channel
+            </a>
+            <a id="btnGroup" href="#" target="_blank" class="join-btn-link">
+                <i class="fas fa-users"></i> Join Group
+            </a>
+
+            <button class="btn-s verify-btn" onclick="window.verifyJoin()">✅ I HAVE JOINED</button>
         </div>
     </div>
 
     <!-- Admin Login -->
-    <div id="adminLoginModal" class="modal-overlay">
-        <div class="modal-content">
-            <h3>Admin Login</h3>
-            <input type="password" id="adminPass" placeholder="Enter Password">
-            <button class="modal-btn" onclick="checkAdminPass()">Login</button>
-            <button class="modal-btn close" onclick="document.getElementById('adminLoginModal').classList.remove('active')">Cancel</button>
+    <div id="modalAuth" class="modal">
+        <div class="modal-box" style="max-width: 320px;">
+            <h3 style="margin-top:0">Admin Access</h3>
+            <input type="password" id="adminPassInput" placeholder="••••••">
+            <button class="btn-s btn-ok" onclick="window.verifyAdmin()">LOGIN</button>
+            <button class="btn-s btn-close" onclick="document.getElementById('modalAuth').classList.remove('active')">CANCEL</button>
         </div>
     </div>
 
     <!-- Admin Panel -->
-    <div id="adminPanelModal" class="modal-overlay">
-        <div class="modal-content" style="text-align: left;">
-            <h3 style="text-align: center; margin-top:0;">Admin Panel</h3>
+    <div id="modalAdmin" class="modal">
+        <div class="modal-box" style="text-align: left;">
+            <h3 style="text-align: center; margin: 0 0 15px; border-bottom:1px solid #333; padding-bottom:10px;">Admin Config</h3>
             
-            <p style="text-align:center; font-size:12px; color:#aaa;">Global Winners: <span id="admTotalWins">0</span> / 10</p>
-            <hr style="border-color: #333">
+            <div class="toggle-box">
+                <span style="font-size:13px; font-weight:bold; color:var(--warning);">Maintenance Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="cfgMaintenance">
+                    <span class="slider"></span>
+                </label>
+            </div>
 
-            <label>Prize Text</label>
-            <input type="text" id="cfgPrize">
+            <!-- Join Links -->
+            <label style="color: var(--telegram);">Mandatory Channel Link</label>
+            <input type="text" id="cfgChannel" placeholder="https://t.me/YourChannel">
+            <label style="color: var(--telegram);">Mandatory Group Link</label>
+            <input type="text" id="cfgGroup" placeholder="https://t.me/YourGroup">
 
-            <label>Telegram Link</label>
-            <input type="text" id="cfgLink">
+            <div style="background: #0d1117; padding: 12px; border-radius: 10px; margin-bottom: 12px; border:1px solid #333;">
+                <label style="margin-top:0">Pool Limit</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="number" id="cfgMaxLimit" style="margin:0">
+                    <button class="btn-s" style="width:auto; margin:0; font-size:11px; padding:10px; background:#333;" onclick="window.resetPoolCount()">Reset (0)</button>
+                </div>
+                <div style="font-size:11px; color:#666; margin-top:5px; text-align:right;">Current Spins: <span id="admCurSpins">0</span></div>
+            </div>
 
-            <label>Win Chance (0.5 = 50%)</label>
-            <input type="number" step="0.05" id="cfgChance">
+            <label>Add Prize</label>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="newPrizeName" placeholder="Name" style="flex: 2;">
+                <select id="newPrizeType" style="flex: 1; background:#000;">
+                    <option value="win">Win</option>
+                    <option value="lose">Lose</option>
+                </select>
+            </div>
+            <button class="btn-s" style="background:var(--secondary); color:#fff; margin-top:0;" onclick="window.addItem()">+ Add Item</button>
             
-            <label>Bot Token</label>
-            <input type="text" id="cfgBotToken">
-            
-            <label>Chat ID</label>
-            <input type="text" id="cfgChatID">
+            <div id="prizeListContainer" style="max-height: 100px; overflow-y:auto; margin:10px 0; border:1px solid #333; padding:5px; border-radius:5px;"></div>
 
-            <button class="modal-btn" style="background: #444; color: #fff;" onclick="resetMyCooldown()">Reset My Timer (Test)</button>
+            <label>Bot Token</label><input type="text" id="cfgToken">
+            <label>Chat ID</label><input type="text" id="cfgChatId">
+            <label>Win Chance %</label><input type="number" id="cfgChance">
+            <label>Password</label><input type="text" id="cfgNewPass">
 
-            <label style="display:block; margin-top:10px;">Full Config JSON</label>
-            <textarea id="jsonArea" rows="3"></textarea>
-            <button class="modal-btn" style="background: var(--secondary); color:#fff" onclick="importJson()">Import JSON</button>
-
-            <button class="modal-btn" onclick="saveAdminSettings()">SAVE SETTINGS</button>
-            <button class="modal-btn close" onclick="document.getElementById('adminPanelModal').classList.remove('active')">Close</button>
+            <button class="btn-s btn-ok" onclick="window.saveSettings()">SAVE ALL CHANGES</button>
+            <button class="btn-s btn-close" onclick="document.getElementById('modalAdmin').classList.remove('active')">CLOSE</button>
         </div>
     </div>
 
-    <script>
-        // ================= TELEGRAM USER DATA =================
-        let currentUser = {
-            id: "Unknown",
-            username: "Guest",
-            first_name: "Guest"
+    <!-- Result Modal -->
+    <div id="modalRes" class="modal">
+        <div class="modal-box">
+            <h1 id="resEmoji" style="font-size: 60px; margin: 10px 0;"></h1>
+            <h2 id="resTitle" style="margin:5px 0;"></h2>
+            <p id="resDesc" style="color: #ccc; font-size: 14px; margin-bottom: 20px;"></p>
+            <button class="btn-s btn-ok" onclick="document.getElementById('modalRes').classList.remove('active')">AWESOME</button>
+        </div>
+    </div>
+
+    <!-- FIREBASE LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set, update, get } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+        // === REPLACE WITH YOUR CONFIG ===
+        const firebaseConfig = {
+            apiKey: "AIzaSyCqhlpl7ot8Kuq_poxWNJPUBUvFvy-Qgls",
+            authDomain: "allgame-arena.firebaseapp.com",
+            databaseURL: "https://allgame-arena-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "allgame-arena",
+            storageBucket: "allgame-arena.firebasestorage.app",
+            messagingSenderId: "956752654560",
+            appId: "1:956752654560:web:8cab97192d14dcab20e085"
         };
 
-        const tg = window.Telegram.WebApp;
-        tg.expand(); 
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        // State
+        let appConfig = { prizes: [], totalSpins: 0, maxLimit: 50, maintenance: false, channelLink: "", groupLink: "" }; 
+        let currentUser = null;
+        let canSpin = false;
+        let tempPrizes = [];
+        let isPoolFull = false;
+        let hasJoined = false; 
+        const COOLDOWN_HOURS = 24;
+
+        // Init Telegram
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        if (tg.initDataUnsafe?.user) {
             currentUser = tg.initDataUnsafe.user;
-            document.getElementById('userInfo').innerText = `Logged in as: ${currentUser.first_name} (@${currentUser.username || 'NoUsername'})`;
+            const nameDisplay = currentUser.first_name.length > 10 ? currentUser.first_name.substring(0, 10)+'..' : currentUser.first_name;
+            document.getElementById('userInfo').innerHTML = `<i class="fas fa-user"></i> ${nameDisplay}`;
         } else {
-            document.getElementById('userInfo').innerText = "Running outside Telegram (Guest Mode)";
+            currentUser = { id: 12345678, first_name: "GuestUser", username: "guest" };
+            document.getElementById('userInfo').innerHTML = `<i class="fas fa-user-secret"></i> Guest`;
         }
 
-        // ================= CONFIG & STATE =================
-        const DEFAULT_CONFIG = {
-            prizeText: "0.05 USDT",
-            telegramLink: "https://t.me/TrustedIncome360BD",
-            winChance: 0.3,
-            maxWinners: 10,
-            botToken: "8268506010:AAHNsIBpPWzbK37cb5g8x8_1IXf1vHem6DM", 
-            adminChatId: "5223267506",
-            globalWinCount: 0 
-        };
-        const ADMIN_PASS = "SA20052@";
+        // Check local storage for join status
+        if(localStorage.getItem('joined_community') === 'true') {
+            hasJoined = true;
+        }
 
-        let config = JSON.parse(localStorage.getItem('spin_config')) || DEFAULT_CONFIG;
-        let lastSpinTime = parseInt(localStorage.getItem('spin_last_time')) || 0;
-        const COOLDOWN_MS = 24 * 60 * 60 * 1000; 
-
-        // ================= ENGINE =================
+        // Elements
         const canvas = document.getElementById('wheelCanvas');
         const ctx = canvas.getContext('2d');
-        const spinBtn = document.getElementById('spinBtn');
-        const timerDisplay = document.getElementById('timerDisplay');
-        const tgLinkBtn = document.getElementById('tg-link-btn');
-        
-        tgLinkBtn.href = config.telegramLink;
+        const btn = document.getElementById('spinBtn');
+        const timerTxt = document.getElementById('timerDisplay');
+        const poolBadge = document.getElementById('poolStatus');
+        const maintenanceScreen = document.getElementById('maintenanceScreen');
+        const btnChannel = document.getElementById('btnChannel');
+        const btnGroup = document.getElementById('btnGroup');
 
-        const slices = 8;
-        const radius = canvas.width / 2;
-        const arc = (2 * Math.PI) / slices;
-        let ang = 0;
-        let isSpinning = false;
-
-        function drawWheel() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for(let i=0; i<slices; i++) {
-                const angStart = ang + (i * arc);
-                const angEnd = ang + ((i + 1) * arc);
-                const isWinSlice = (i % 2 === 0); 
+        // ===================================
+        // 1. CONFIG LISTENER
+        // ===================================
+        onValue(ref(db, 'config'), (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                appConfig = data;
+                if(!appConfig.prizes) appConfig.prizes = [{name:"Empty", type:"lose"}];
                 
+                // Update Join Links
+                btnChannel.href = appConfig.channelLink || "#";
+                btnGroup.href = appConfig.groupLink || "#";
+
+                // Maintenance
+                maintenanceScreen.style.display = appConfig.maintenance === true ? 'flex' : 'none';
+
+                // Pool
+                const used = appConfig.totalSpins || 0;
+                const limit = appConfig.maxLimit || 100;
+                poolBadge.innerText = `Pool: ${used}/${limit}`;
+                
+                if (used >= limit) {
+                    isPoolFull = true;
+                    btn.innerText = "POOL FILLED";
+                    btn.disabled = true;
+                    poolBadge.style.color = "var(--danger)";
+                } else {
+                    isPoolFull = false;
+                    poolBadge.style.color = "var(--warning)";
+                    checkUserStatus(); 
+                }
+                drawWheel();
+            } else {
+                window.createDefaultConfig();
+            }
+        });
+
+        // ===================================
+        // 2. LIVE LEADERBOARD (WITH TIME)
+        // ===================================
+        onValue(ref(db, 'users'), (snapshot) => {
+            const users = snapshot.val();
+            if(!users) return;
+            const userArray = Object.values(users);
+            userArray.sort((a, b) => (b.lastSpin || 0) - (a.lastSpin || 0));
+            const feedList = document.getElementById('feedList');
+            feedList.innerHTML = "";
+            
+            userArray.slice(0, 30).forEach(u => {
+                if(u.lastReward) {
+                    const div = document.createElement('div');
+                    div.className = "feed-item";
+                    const idStr = u.id ? `..${String(u.id).slice(-4)}` : '';
+                    
+                    // Format Time (e.g. 10:30 PM)
+                    let timeStr = "";
+                    if(u.lastSpin) {
+                        const date = new Date(u.lastSpin);
+                        timeStr = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    }
+
+                    div.innerHTML = `
+                        <div class="feed-user">
+                            <span>${u.name}</span>
+                            <span class="feed-id">(${idStr})</span>
+                        </div>
+                        <div class="feed-right">
+                            <span class="feed-prize" style="color:${u.win ? 'var(--success)' : 'var(--danger)'}">${u.lastReward}</span>
+                            <div class="feed-time">${timeStr}</div>
+                        </div>
+                    `;
+                    feedList.appendChild(div);
+                }
+            });
+        });
+
+        // ===================================
+        // 3. WHEEL DRAW
+        // ===================================
+        function drawWheel() {
+            const items = appConfig.prizes;
+            const len = items.length;
+            const arc = (2 * Math.PI) / len;
+            const radius = canvas.width / 2;
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            ctx.translate(radius, radius);
+            for(let i=0; i<len; i++) {
+                const angle = i * arc;
                 ctx.beginPath();
-                ctx.moveTo(radius, radius);
-                ctx.arc(radius, radius, radius, angStart, angEnd);
-                ctx.fillStyle = isWinSlice ? '#00f3ff' : '#1e2538';
+                ctx.moveTo(0,0);
+                ctx.arc(0, 0, radius, angle, angle + arc);
+                ctx.fillStyle = (items[i].type === 'win') ? (i % 2 === 0 ? '#00f3ff' : '#00a8b0') : (i % 2 === 0 ? '#151a27' : '#222838');
                 ctx.fill();
                 ctx.stroke();
-                
                 ctx.save();
-                ctx.translate(radius, radius);
-                ctx.rotate(angStart + arc / 2);
+                ctx.rotate(angle + arc/2);
                 ctx.textAlign = "right";
-                ctx.fillStyle = isWinSlice ? '#000' : '#fff';
-                ctx.font = "bold 24px Poppins";
-                const label = isWinSlice ? config.prizeText : "Try Again";
-                ctx.fillText(label, radius - 20, 10);
+                ctx.fillStyle = (items[i].type === 'win') ? "#000" : "#fff";
+                ctx.font = "bold 16px Poppins";
+                let text = items[i].name;
+                if(text.length > 12) text = text.substring(0, 10) + "..";
+                ctx.fillText(text, radius - 25, 6);
                 ctx.restore();
             }
+            ctx.translate(-radius, -radius);
         }
 
-        // ================= GAME LOGIC =================
-        function checkStatus() {
-            const now = Date.now();
-            
-            // Limit Check
-            if (config.globalWinCount >= config.maxWinners) {
-                disableGame("Giveaway Ended", "Limit Reached");
+        // ===================================
+        // 4. SPIN LOGIC & JOIN CHECK
+        // ===================================
+        let currentRotation = 0;
+        btn.addEventListener('click', () => {
+            if(isPoolFull) return;
+
+            // CHECK JOIN STATUS FIRST
+            if(!hasJoined) {
+                document.getElementById('modalJoin').classList.add('active');
                 return;
             }
 
-            // Cooldown Check
-            if (now - lastSpinTime < COOLDOWN_MS) {
-                const remaining = COOLDOWN_MS - (now - lastSpinTime);
-                const hrs = Math.floor(remaining / (1000 * 60 * 60));
-                const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-                
-                spinBtn.disabled = true;
-                spinBtn.innerText = "COME BACK LATER";
-                timerDisplay.style.display = 'block';
-                timerDisplay.innerText = `Next Spin: ${hrs}h ${mins}m`;
-            } else {
-                spinBtn.disabled = false;
-                spinBtn.innerText = "SPIN TO WIN";
-                timerDisplay.style.display = 'none';
-            }
-            drawWheel();
-        }
+            if(!canSpin) return;
+            
+            canSpin = false;
+            btn.disabled = true;
 
-        function disableGame(btnText, alertText) {
-            spinBtn.disabled = true;
-            spinBtn.innerText = btnText;
-            spinBtn.style.background = "#333";
-        }
+            const items = appConfig.prizes;
+            const winChance = appConfig.chance || 20;
+            const isWin = (Math.random() * 100) < winChance;
 
-        function spin() {
-            if (isSpinning) return;
-            isSpinning = true;
-            spinBtn.disabled = true;
+            let indices = [];
+            items.forEach((item, index) => {
+                if(item.type === (isWin ? 'win' : 'lose')) indices.push(index);
+            });
 
-            // Logic
-            let isWin = Math.random() < config.winChance;
-            if (config.globalWinCount >= config.maxWinners) isWin = false;
-
-            // Target Index
-            let targetIndex;
-            if(isWin) {
-                const possible = [0, 2, 4, 6];
-                targetIndex = possible[Math.floor(Math.random() * possible.length)];
-            } else {
-                const possible = [1, 3, 5, 7];
-                targetIndex = possible[Math.floor(Math.random() * possible.length)];
-            }
-
-            // Calc Angles
-            const sliceDeg = 360 / slices;
-            const stopAngle = -(targetIndex * sliceDeg) - (sliceDeg / 2) - 90; 
-            const totalRot = (360 * 6) + stopAngle; 
+            if(indices.length === 0) indices = items.map((_, i) => i);
+            const targetIdx = indices[Math.floor(Math.random() * indices.length)];
+            
+            const sliceDeg = 360 / items.length;
+            const stopAngle = (targetIdx * sliceDeg) + (sliceDeg / 2);
+            const targetRotation = (360 * 6) + (360 - stopAngle);
 
             let start = null;
-            const duration = 4000;
-            const startAng = ang * 180 / Math.PI;
-
             function animate(time) {
-                if (!start) start = time;
-                const progress = Math.min((time - start) / duration, 1);
-                const ease = 1 - Math.pow(1 - progress, 3);
-                
-                ang = (startAng + (totalRot - startAng) * ease) * Math.PI / 180;
-                drawWheel();
-
+                if(!start) start = time;
+                const progress = Math.min((time - start) / 4500, 1);
+                const ease = 1 - Math.pow(1 - progress, 4);
+                const rot = currentRotation + (targetRotation * ease);
+                canvas.style.transform = `rotate(${rot}deg)`;
                 if (progress < 1) requestAnimationFrame(animate);
-                else endSpin(isWin);
+                else {
+                    currentRotation += targetRotation;
+                    finishSpin(items[targetIdx]);
+                }
             }
             requestAnimationFrame(animate);
-        }
+        });
 
-        function endSpin(isWin) {
-            isSpinning = false;
-            lastSpinTime = Date.now();
-            localStorage.setItem('spin_last_time', lastSpinTime);
+        // Verification Function
+        window.verifyJoin = () => {
+            localStorage.setItem('joined_community', 'true');
+            hasJoined = true;
+            document.getElementById('modalJoin').classList.remove('active');
+            alert("Thanks for joining! You can now spin.");
+        };
+
+        function finishSpin(item) {
+            const now = Date.now();
+            const didWin = item.type === 'win';
+            const currentTotal = appConfig.totalSpins || 0;
             
-            if (isWin) {
-                config.globalWinCount++;
-                localStorage.setItem('spin_config', JSON.stringify(config));
-                
-                document.getElementById('resIcon').innerText = "🎉";
-                document.getElementById('resTitle').innerText = "CONGRATULATIONS!";
-                document.getElementById('resTitle').style.color = "#00f3ff";
-                document.getElementById('resText').innerText = `You won ${config.prizeText}! Screenshot this!`;
-                
-                sendTelegramAlert(config.prizeText);
+            update(ref(db, 'config'), { totalSpins: currentTotal + 1 });
+            update(ref(db, 'users/' + currentUser.id), {
+                id: currentUser.id,
+                lastSpin: now,
+                name: currentUser.first_name,
+                username: currentUser.username || "none",
+                lastReward: item.name,
+                win: didWin
+            });
+
+            const modal = document.getElementById('modalRes');
+            const h1 = document.getElementById('resEmoji');
+            const h2 = document.getElementById('resTitle');
+            const p = document.getElementById('resDesc');
+
+            if(didWin) {
+                h1.innerText = "🎁";
+                h2.innerText = "CONGRATS!";
+                h2.style.color = "#00f3ff";
+                p.innerText = `You won: ${item.name}`;
+                sendTelegramNotif(item.name, true);
             } else {
-                document.getElementById('resIcon').innerText = "😢";
-                document.getElementById('resTitle').innerText = "Try Again";
-                document.getElementById('resTitle').style.color = "#ff2a6d";
-                document.getElementById('resText').innerText = "Better luck next time!";
+                h1.innerText = "💔";
+                h2.innerText = "So Close!";
+                h2.style.color = "#ff2a6d";
+                p.innerText = item.name;
             }
-            
-            document.getElementById('resultModal').classList.add('active');
-            checkStatus();
+            modal.classList.add('active');
+            lockSpin(now + (COOLDOWN_HOURS * 3600000));
         }
 
-        function closeResultModal() {
-            document.getElementById('resultModal').classList.remove('active');
+        function sendTelegramNotif(prizeName, isWin) {
+            if(!appConfig.botToken || !appConfig.adminId) return;
+            const userLink = currentUser.username ? `[@${currentUser.username}]` : `[${currentUser.first_name}](tg://user?id=${currentUser.id})`;
+            const statusEmoji = isWin ? "🟢" : "🔴";
+            const msg = `🎯 *NEW SPIN RESULT* 🎯\n\n👤 *User:* ${userLink}\n🆔 *ID:* \`${currentUser.id}\`\n🎁 *Prize:* ${prizeName}\n📊 *Pool:* ${appConfig.totalSpins + 1}/${appConfig.maxLimit}\n\n${statusEmoji} _Generated by SpinApp_`;
+            fetch(`https://api.telegram.org/bot${appConfig.botToken}/sendMessage?chat_id=${appConfig.adminId}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
         }
 
-        function sendTelegramAlert(prize) {
-            if (!config.botToken || !config.adminChatId) return;
-            const userLink = currentUser.username ? `@${currentUser.username}` : `[${currentUser.first_name}](tg://user?id=${currentUser.id})`;
-            const msg = `🎰 *NEW WINNER!* 🎰\n\n👤 *User:* ${currentUser.first_name}\n🆔 *UID:* \`${currentUser.id}\`\n🔗 *Username:* ${userLink}\n\n🏆 *Prize:* ${prize}\n📊 *Total Winners:* ${config.globalWinCount}`;
-            const url = `https://api.telegram.org/bot${config.botToken}/sendMessage?chat_id=${config.adminChatId}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`;
-            fetch(url).catch(err => console.log("Offline"));
+        // ===================================
+        // 5. COOLDOWN
+        // ===================================
+        function checkUserStatus() {
+            if(isPoolFull || appConfig.maintenance) return;
+            get(ref(db, 'users/' + currentUser.id)).then((snap) => {
+                const data = snap.val();
+                if (data && data.lastSpin) {
+                    const diff = Date.now() - data.lastSpin;
+                    if (diff < COOLDOWN_HOURS * 3600000) {
+                        lockSpin(data.lastSpin + COOLDOWN_HOURS * 3600000);
+                        return;
+                    }
+                }
+                unlockSpin();
+            });
         }
 
-        function openAdminLogin() { document.getElementById('adminLoginModal').classList.add('active'); }
+        function lockSpin(targetTime) {
+            canSpin = false;
+            btn.disabled = true;
+            btn.style.background = "#222";
+            btn.innerText = "COOLDOWN ACTIVE";
+            if(window.timerInterval) clearInterval(window.timerInterval);
+            window.timerInterval = setInterval(() => {
+                const now = Date.now();
+                const dist = targetTime - now;
+                if(dist < 0) { clearInterval(window.timerInterval); checkUserStatus(); return; }
+                const h = Math.floor(dist / (1000*60*60));
+                const m = Math.floor((dist % (1000*60*60)) / (1000*60));
+                const s = Math.floor((dist % (1000*60)) / 1000);
+                timerTxt.innerText = `Next Spin: ${h}h ${m}m ${s}s`;
+            }, 1000);
+        }
 
-        function checkAdminPass() {
-            const pass = document.getElementById('adminPass').value;
-            if (pass === ADMIN_PASS) {
-                document.getElementById('adminLoginModal').classList.remove('active');
+        function unlockSpin() {
+            if(isPoolFull || appConfig.maintenance) return;
+            canSpin = true;
+            btn.disabled = false;
+            btn.style.background = "linear-gradient(90deg, var(--primary), #00c3cc)";
+            btn.innerText = "SPIN TO WIN";
+            timerTxt.innerText = "";
+            if(window.timerInterval) clearInterval(window.timerInterval);
+        }
+
+        // ===================================
+        // 6. ADMIN FUNCTIONS
+        // ===================================
+        window.openAdminLogin = () => document.getElementById('modalAuth').classList.add('active');
+
+        window.verifyAdmin = () => {
+            const pass = document.getElementById('adminPassInput').value;
+            if(pass === (appConfig.adminPass || "admin123")) {
+                document.getElementById('modalAuth').classList.remove('active');
                 openAdminPanel();
             } else {
-                alert('Wrong Password!');
+                alert("Wrong Password");
             }
-        }
+        };
 
         function openAdminPanel() {
-            document.getElementById('adminPanelModal').classList.add('active');
-            document.getElementById('cfgPrize').value = config.prizeText;
-            document.getElementById('cfgLink').value = config.telegramLink;
-            document.getElementById('cfgChance').value = config.winChance;
-            document.getElementById('cfgBotToken').value = config.botToken;
-            document.getElementById('cfgChatID').value = config.adminChatId;
-            document.getElementById('admTotalWins').innerText = config.globalWinCount;
-            document.getElementById('jsonArea').value = JSON.stringify(config, null, 2);
+            document.getElementById('modalAdmin').classList.add('active');
+            
+            document.getElementById('cfgToken').value = appConfig.botToken || "";
+            document.getElementById('cfgChatId').value = appConfig.adminId || "";
+            document.getElementById('cfgChance').value = appConfig.chance || 20;
+            document.getElementById('cfgNewPass').value = appConfig.adminPass || "admin123";
+            document.getElementById('cfgMaxLimit').value = appConfig.maxLimit || 50;
+            document.getElementById('admCurSpins').innerText = appConfig.totalSpins || 0;
+            document.getElementById('cfgMaintenance').checked = appConfig.maintenance || false;
+            
+            document.getElementById('cfgChannel').value = appConfig.channelLink || "";
+            document.getElementById('cfgGroup').value = appConfig.groupLink || "";
+
+            tempPrizes = JSON.parse(JSON.stringify(appConfig.prizes));
+            renderAdminPrizes();
         }
 
-        function saveAdminSettings() {
-            config.prizeText = document.getElementById('cfgPrize').value;
-            config.telegramLink = document.getElementById('cfgLink').value;
-            config.winChance = parseFloat(document.getElementById('cfgChance').value);
-            config.botToken = document.getElementById('cfgBotToken').value;
-            config.adminChatId = document.getElementById('cfgChatID').value;
-            localStorage.setItem('spin_config', JSON.stringify(config));
-            tgLinkBtn.href = config.telegramLink;
-            location.reload();
+        window.addItem = () => {
+            const name = document.getElementById('newPrizeName').value;
+            const type = document.getElementById('newPrizeType').value;
+            if(name) {
+                tempPrizes.push({name, type});
+                document.getElementById('newPrizeName').value = "";
+                renderAdminPrizes();
+            }
+        };
+
+        window.deleteItem = (index) => {
+            tempPrizes.splice(index, 1);
+            renderAdminPrizes();
+        };
+
+        window.resetPoolCount = () => {
+            if(confirm("Reset total spins to 0?")) {
+                update(ref(db, 'config'), { totalSpins: 0 });
+                document.getElementById('admCurSpins').innerText = "0";
+                appConfig.totalSpins = 0;
+            }
+        };
+
+        function renderAdminPrizes() {
+            const container = document.getElementById('prizeListContainer');
+            container.innerHTML = "";
+            tempPrizes.forEach((p, i) => {
+                container.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid #333; font-size:12px;">
+                        <span>${p.name}</span>
+                        <span style="color:${p.type==='win'?'var(--primary)':'var(--danger)'}">${p.type}</span>
+                        <i class="fas fa-trash" style="color:#ff4444; cursor:pointer;" onclick="window.deleteItem(${i})"></i>
+                    </div>
+                `;
+            });
         }
 
-        function importJson() {
-            try {
-                config = JSON.parse(document.getElementById('jsonArea').value);
-                localStorage.setItem('spin_config', JSON.stringify(config));
-                alert("Imported!");
-                location.reload();
-            } catch (e) { alert("Invalid JSON"); }
+        window.saveSettings = () => {
+            if(tempPrizes.length < 2) return alert("Min 2 items!");
+            
+            update(ref(db, 'config'), {
+                botToken: document.getElementById('cfgToken').value,
+                adminId: document.getElementById('cfgChatId').value,
+                chance: parseInt(document.getElementById('cfgChance').value),
+                adminPass: document.getElementById('cfgNewPass').value,
+                maxLimit: parseInt(document.getElementById('cfgMaxLimit').value),
+                maintenance: document.getElementById('cfgMaintenance').checked,
+                channelLink: document.getElementById('cfgChannel').value,
+                groupLink: document.getElementById('cfgGroup').value,
+                prizes: tempPrizes
+            }).then(() => {
+                alert("Settings Saved!");
+                document.getElementById('modalAdmin').classList.remove('active');
+            });
+        };
+
+        window.createDefaultConfig = () => {
+            set(ref(db, 'config'), {
+                adminPass: "admin123",
+                chance: 20,
+                maxLimit: 100,
+                totalSpins: 0,
+                maintenance: false,
+                channelLink: "https://t.me/",
+                groupLink: "https://t.me/",
+                prizes: [{name: "0.10 $", type: "win"}, {name: "Try Again", type: "lose"}]
+            });
         }
-
-        function resetMyCooldown() {
-            localStorage.removeItem('spin_last_time');
-            alert("Timer Reset!");
-            checkStatus();
-        }
-
-        // Make sure button is connected in JS too
-        document.getElementById('spinBtn').addEventListener('click', spin);
-
-        // Init
-        checkStatus();
     </script>
 </body>
 </html>
