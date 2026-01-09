@@ -43,6 +43,45 @@
             overflow-x: hidden;
         }
 
+        /* Notification Bar */
+        .notification-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #ff6b6b, #ffa726);
+            color: white;
+            padding: 10px 40px 10px 15px;
+            z-index: 9997;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        .notification-close {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         /* Loading Screen */
         .loading-screen {
             position: fixed;
@@ -425,6 +464,29 @@
             color: var(--text-secondary);
         }
 
+        /* Ad Container */
+        .ad-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid var(--border);
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ad-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
         /* Content Sections */
         .content-section {
             background: var(--card-bg);
@@ -456,7 +518,7 @@
             gap: 10px;
         }
 
-        /* Game Wheel */
+        /* Enhanced Game Wheel */
         .wheel-container {
             position: relative;
             width: 280px;
@@ -485,6 +547,18 @@
             background: linear-gradient(var(--angle), var(--color1), var(--color2));
             clip-path: polygon(100% 100%, 0% 100%, 100% 0%);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .wheel-segment-text {
+            position: absolute;
+            top: 50%;
+            left: 70%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            transform-origin: 0 0;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
         .wheel-center {
@@ -519,6 +593,19 @@
             background: #666;
             cursor: not-allowed;
             transform: translate(-50%, -50%) scale(1);
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 25px solid var(--danger);
+            z-index: 5;
         }
 
         .spin-info {
@@ -734,6 +821,46 @@
 
         .btn-danger {
             background: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        /* Dynamic Buttons */
+        .dynamic-buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .dynamic-button-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .dynamic-button-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px var(--shadow);
+        }
+
+        .dynamic-button-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 20px;
             color: white;
         }
 
@@ -977,10 +1104,40 @@
             .tasks-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+            
+            .dynamic-buttons-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .notification-bar {
+                font-size: 12px;
+                padding: 8px 35px 8px 12px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .tasks-grid,
+            .dynamic-buttons-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Notification Bar -->
+    <div id="notificationBar" class="notification-bar">
+        <marquee id="notificationMarquee">
+            <!-- Notifications will be shown here -->
+        </marquee>
+        <button onclick="hideNotificationBar()" class="notification-close">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
     <!-- Loading Screen -->
     <div id="loadingScreen" class="loading-screen">
         <div class="loader"></div>
@@ -1099,6 +1256,17 @@
                 </div>
             </div>
             
+            <!-- Ad Container -->
+            <div class="ad-container" id="monetagAdContainer">
+                <div class="ad-label">Watch Ad for Extra Spin</div>
+                <button onclick="watchAdForSpin()" class="btn btn-warning" id="watchAdBtn">
+                    <i class="fas fa-eye"></i> Watch Ad & Get $0.50
+                </button>
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 10px;">
+                    <i class="fas fa-info-circle"></i> Available once per day
+                </div>
+            </div>
+            
             <div class="spin-info">
                 <div class="info-item">
                     <div class="info-label">Spins Left</div>
@@ -1112,6 +1280,15 @@
                     <div class="info-label">Win Chance</div>
                     <div class="info-value" id="winChance">30%</div>
                 </div>
+            </div>
+            
+            <!-- Dynamic Buttons Section -->
+            <h2 class="section-title" style="margin-top: 30px;">
+                <i class="fas fa-bolt"></i> Quick Actions
+            </h2>
+            
+            <div id="dynamicButtonsContainer" class="dynamic-buttons-grid">
+                <!-- Dynamic buttons will be loaded here -->
             </div>
             
             <div style="text-align: center; margin-top: 20px;">
@@ -1130,6 +1307,15 @@
             
             <div class="tasks-grid" id="tasksList">
                 <!-- Tasks will be loaded here -->
+            </div>
+            
+            <!-- Ad in Tasks Section -->
+            <div class="ad-container" style="margin-top: 20px;">
+                <div class="ad-label">Complete Offer</div>
+                <div style="font-size: 14px; margin-bottom: 10px;">Watch video to earn $1.00</div>
+                <button onclick="watchVideoAd()" class="btn btn-warning" id="videoAdBtn">
+                    <i class="fas fa-play-circle"></i> Watch Video & Earn
+                </button>
             </div>
             
             <div style="text-align: center; margin-top: 20px;">
@@ -1186,6 +1372,20 @@
                 </button>
             </div>
             
+            <!-- Ad in Withdraw Section -->
+            <div class="ad-container" style="margin-top: 30px;">
+                <div class="ad-label">Need more balance?</div>
+                <div style="font-size: 14px; margin-bottom: 10px;">Complete quick offers</div>
+                <div id="offerButtons" style="display: flex; gap: 10px; justify-content: center;">
+                    <button onclick="completeOffer('survey')" class="btn btn-success" style="flex: 1;">
+                        <i class="fas fa-clipboard-list"></i> Survey
+                    </button>
+                    <button onclick="completeOffer('install')" class="btn btn-primary" style="flex: 1;">
+                        <i class="fas fa-download"></i> Install App
+                    </button>
+                </div>
+            </div>
+            
             <h3 class="section-title" style="margin-top: 30px; font-size: 16px;">
                 <i class="fas fa-history"></i> Recent Withdrawals
             </h3>
@@ -1210,6 +1410,9 @@
             <div style="text-align: center; margin-top: 20px;">
                 <button onclick="markAllAsRead()" class="btn btn-secondary">
                     <i class="fas fa-check-double"></i> Mark All as Read
+                </button>
+                <button onclick="clearAllNotifications()" class="btn btn-danger" style="margin-left: 10px;">
+                    <i class="fas fa-trash"></i> Clear All
                 </button>
             </div>
         </section>
@@ -1241,6 +1444,25 @@
                     <div class="stat-label">Level</div>
                     <div class="stat-value" id="userLevel">1</div>
                 </div>
+            </div>
+            
+            <!-- Referral System -->
+            <div style="background: rgba(255,255,255,0.05); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 10px; color: var(--primary);">
+                    <i class="fas fa-user-plus"></i> Referral Program
+                </h3>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
+                    Invite friends and earn 10% of their earnings!
+                </p>
+                <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; margin-bottom: 10px;">
+                    <div style="font-size: 12px; color: var(--text-secondary);">Your Referral Link:</div>
+                    <div id="referralLink" style="font-family: monospace; font-size: 11px; color: var(--primary); margin-top: 5px; word-break: break-all;">
+                        Loading...
+                    </div>
+                </div>
+                <button onclick="copyReferralLink()" class="btn btn-success" style="width: 100%;">
+                    <i class="fas fa-copy"></i> Copy Referral Link
+                </button>
             </div>
             
             <button onclick="logout()" class="btn btn-danger" style="width: 100%; margin-top: 20px;">
@@ -1372,13 +1594,17 @@
         let userId = null;
         let userData = null;
         let tasks = [];
+        let dynamicButtons = [];
         let notifications = [];
         let spinCooldown = 0;
         let winChance = 30;
+        let dailySpinLimit = 10;
         let isLoggedIn = false;
         let currentRewardId = null;
         let isSpinning = false;
         let maintenanceMode = false;
+        let lastSpinTime = 0;
+        let spinCooldownTime = 60 * 60 * 1000; // 1 hour in milliseconds
 
         // ============================================
         // INITIALIZATION
@@ -1393,6 +1619,7 @@
                     // Check if already logged in
                     const savedLogin = localStorage.getItem('telegram_bot_user_id');
                     if (savedLogin) {
+                        userId = savedLogin;
                         checkMaintenance();
                     } else {
                         document.getElementById('loginScreen').style.display = 'flex';
@@ -1409,6 +1636,37 @@
                 toggle.parentElement.style.background = checkbox.checked ? 'var(--gradient)' : '#ccc';
             });
         });
+
+        // ============================================
+        // NOTIFICATION BAR SYSTEM
+        // ============================================
+        async function loadNotificationBar() {
+            try {
+                const snapshot = await database.ref('system/notifications').limitToLast(1).once('value');
+                snapshot.forEach((childSnapshot) => {
+                    const notification = childSnapshot.val();
+                    if (notification && notification.active && notification.message) {
+                        const marquee = document.getElementById('notificationMarquee');
+                        marquee.textContent = notification.message;
+                        
+                        // Check if user has dismissed this notification
+                        const dismissed = localStorage.getItem(`notification_dismissed_${childSnapshot.key}`);
+                        if (!dismissed) {
+                            document.getElementById('notificationBar').style.display = 'block';
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading notification bar:', error);
+            }
+        }
+
+        function hideNotificationBar() {
+            const notificationBar = document.getElementById('notificationBar');
+            const notificationId = 'latest'; // You can modify this to get actual ID
+            notificationBar.style.display = 'none';
+            localStorage.setItem(`notification_dismissed_${notificationId}`, 'true');
+        }
 
         // ============================================
         // LOGIN SYSTEM
@@ -1518,11 +1776,19 @@
                     totalSpins: 0,
                     totalTasks: 0,
                     level: 1,
-                    experience: 0
+                    experience: 0,
+                    referralCode: generateReferralCode()
                 });
                 
                 // Show welcome bonus
                 showToast(`🎉 Welcome! You received $${startingBalance} bonus!`, 'success');
+                
+                // Record referral if any
+                const urlParams = new URLSearchParams(window.location.search);
+                const referrer = urlParams.get('ref');
+                if (referrer) {
+                    await handleReferral(referrer);
+                }
             }
             
             // Load user data in real-time
@@ -1553,6 +1819,9 @@
             
             isLoggedIn = true;
             
+            // Load notification bar
+            await loadNotificationBar();
+            
             // Start timers
             startTimers();
             
@@ -1580,6 +1849,10 @@
             document.getElementById('bannedScreen').style.display = 'flex';
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'none';
+            
+            if (userData && userData.banReason) {
+                document.getElementById('bannedMessage').textContent = userData.banReason;
+            }
         }
 
         function logout() {
@@ -1597,9 +1870,11 @@
                 await Promise.all([
                     loadGameSettings(),
                     loadTasks(),
+                    loadDynamicButtons(),
                     loadNotifications(),
                     loadWithdrawHistory(),
-                    createWheel()
+                    createEnhancedWheel(),
+                    loadReferralLink()
                 ]);
                 
                 // Update UI
@@ -1617,6 +1892,8 @@
                 const settings = snapshot.val();
                 if (settings) {
                     winChance = settings.winPercentage || 30;
+                    dailySpinLimit = settings.dailySpinLimit || 10;
+                    spinCooldownTime = (settings.spinCooldown || 60) * 60 * 1000;
                     document.getElementById('winChance').textContent = `${winChance}%`;
                 }
             } catch (error) {
@@ -1628,8 +1905,8 @@
             if (!userData) return;
             
             document.getElementById('userBalance').textContent = `$${userData.balance.toFixed(2)}`;
-            document.getElementById('spinsToday').textContent = `${userData.spinsToday || 0}/10`;
-            document.getElementById('spinsLeft').textContent = 10 - (userData.spinsToday || 0);
+            document.getElementById('spinsToday').textContent = `${userData.spinsToday || 0}/${dailySpinLimit}`;
+            document.getElementById('spinsLeft').textContent = dailySpinLimit - (userData.spinsToday || 0);
             document.getElementById('totalEarned').textContent = `$${(userData.totalEarned || 0).toFixed(2)}`;
             document.getElementById('totalWithdrawn').textContent = `$${(userData.totalWithdrawn || 0).toFixed(2)}`;
             document.getElementById('userLevel').textContent = userData.level || 1;
@@ -1644,21 +1921,21 @@
         }
 
         // ============================================
-        // GAME SYSTEM (FIXED)
+        // ENHANCED WHEEL SYSTEM (FIXED)
         // ============================================
-        function createWheel() {
+        function createEnhancedWheel() {
             const wheel = document.getElementById('wheel');
             wheel.innerHTML = '';
             
             const rewards = [
-                { value: 0.10, color1: '#ff0000', color2: '#ff5555' },
-                { value: 0.25, color1: '#00ff00', color2: '#55ff55' },
-                { value: 0.50, color1: '#0000ff', color2: '#5555ff' },
-                { value: 1.00, color1: '#ffff00', color2: '#ffff55' },
-                { value: 0.10, color1: '#ff00ff', color2: '#ff55ff' },
-                { value: 0.75, color1: '#00ffff', color2: '#55ffff' },
-                { value: 0.50, color1: '#ff8800', color2: '#ffaa55' },
-                { value: 2.00, color1: '#8800ff', color2: '#aa55ff' }
+                { value: 0.10, color1: '#ff0000', color2: '#ff5555', label: '$0.10' },
+                { value: 0.25, color1: '#00ff00', color2: '#55ff55', label: '$0.25' },
+                { value: 0.50, color1: '#0000ff', color2: '#5555ff', label: '$0.50' },
+                { value: 1.00, color1: '#ffff00', color2: '#ffff55', label: '$1.00' },
+                { value: 0.10, color1: '#ff00ff', color2: '#ff55ff', label: '$0.10' },
+                { value: 0.75, color1: '#00ffff', color2: '#55ffff', label: '$0.75' },
+                { value: 0.50, color1: '#ff8800', color2: '#ffaa55', label: '$0.50' },
+                { value: 2.00, color1: '#8800ff', color2: '#aa55ff', label: '$2.00' }
             ];
             
             rewards.forEach((reward, index) => {
@@ -1667,8 +1944,22 @@
                 segment.style.setProperty('--angle', `${index * 45}deg`);
                 segment.style.setProperty('--color1', reward.color1);
                 segment.style.setProperty('--color2', reward.color2);
+                
+                // Add value text
+                const text = document.createElement('div');
+                text.className = 'wheel-segment-text';
+                text.textContent = reward.label;
+                segment.appendChild(text);
+                
                 wheel.appendChild(segment);
             });
+            
+            // Add pointer if not exists
+            if (!document.querySelector('.wheel-pointer')) {
+                const pointer = document.createElement('div');
+                pointer.className = 'wheel-pointer';
+                wheel.parentElement.appendChild(pointer);
+            }
         }
 
         function checkSpinAvailability() {
@@ -1682,22 +1973,31 @@
                 return;
             }
             
+            // Check system status
+            database.ref('system/status/spinEnabled').once('value').then((snapshot) => {
+                if (snapshot.exists() && !snapshot.val()) {
+                    document.getElementById('spinButton').disabled = true;
+                    document.getElementById('spinButton').textContent = 'DISABLED';
+                    isSpinning = true;
+                    return;
+                }
+            });
+            
             const now = Date.now();
             const lastSpin = userData.lastSpin || 0;
             const spinsToday = userData.spinsToday || 0;
             
             // Check daily limit
-            if (spinsToday >= 10) {
+            if (spinsToday >= dailySpinLimit) {
                 document.getElementById('spinButton').disabled = true;
-                document.getElementById('spinButton').textContent = 'LIMIT';
+                document.getElementById('spinButton').textContent = 'LIMIT REACHED';
                 isSpinning = true;
                 document.getElementById('cooldownTimer').textContent = '24h';
                 return;
             }
             
             // Check cooldown
-            const cooldownMs = 60 * 60 * 1000; // 1 hour
-            const timeLeft = cooldownMs - (now - lastSpin);
+            const timeLeft = spinCooldownTime - (now - lastSpin);
             
             if (timeLeft > 0) {
                 spinCooldown = Math.ceil(timeLeft / 1000);
@@ -1710,7 +2010,7 @@
                 document.getElementById('spinButton').disabled = false;
                 document.getElementById('spinButton').textContent = 'SPIN';
                 isSpinning = false;
-                document.getElementById('cooldownTimer').textContent = 'Ready';
+                document.getElementById('cooldownTimer').textContent = 'READY';
             }
         }
 
@@ -1802,7 +2102,7 @@
                     showToast('Error processing spin', 'danger');
                 }
                 
-                // Reset spin button
+                // Reset spin button after 2 seconds
                 setTimeout(() => {
                     checkSpinAvailability();
                 }, 2000);
@@ -1855,7 +2155,253 @@
         }
 
         // ============================================
-        // TASK SYSTEM (FIXED)
+        // AD SYSTEM (MONETAG)
+        // ============================================
+        async function watchAdForSpin() {
+            if (!userId || !userData) return;
+            
+            // Check if user already watched ad today
+            const today = new Date().toDateString();
+            const lastAdWatch = localStorage.getItem(`ad_watch_${userId}_${today}`);
+            
+            if (lastAdWatch) {
+                showToast('You already watched an ad today!', 'warning');
+                return;
+            }
+            
+            const btn = document.getElementById('watchAdBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading ad...';
+            btn.disabled = true;
+            
+            // Simulate ad loading and watching
+            setTimeout(async () => {
+                try {
+                    // Give reward for watching ad
+                    const adReward = 0.50;
+                    const userRef = database.ref(`users/${userId}`);
+                    const snapshot = await userRef.once('value');
+                    const user = snapshot.val();
+                    
+                    const newBalance = (user.balance || 0) + adReward;
+                    await userRef.update({
+                        balance: newBalance,
+                        totalEarned: (user.totalEarned || 0) + adReward,
+                        lastActive: Date.now()
+                    });
+                    
+                    // Mark as watched for today
+                    localStorage.setItem(`ad_watch_${userId}_${today}`, 'true');
+                    
+                    showToast(`✅ Thanks for watching! +$${adReward} added to your balance!`, 'success');
+                    
+                    // Record transaction
+                    const transactionId = Date.now().toString();
+                    await database.ref(`transactions/${transactionId}`).set({
+                        userId: userId,
+                        type: 'ad_reward',
+                        amount: adReward,
+                        date: today,
+                        timestamp: Date.now()
+                    });
+                    
+                } catch (error) {
+                    console.error('Error processing ad:', error);
+                    showToast('Error processing ad', 'danger');
+                }
+                
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                
+            }, 3000);
+        }
+
+        async function watchVideoAd() {
+            if (!userId) return;
+            
+            const btn = document.getElementById('videoAdBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Playing...';
+            btn.disabled = true;
+            
+            setTimeout(async () => {
+                try {
+                    const videoReward = 1.00;
+                    const userRef = database.ref(`users/${userId}`);
+                    const snapshot = await userRef.once('value');
+                    const user = snapshot.val();
+                    
+                    const newBalance = (user.balance || 0) + videoReward;
+                    await userRef.update({
+                        balance: newBalance,
+                        totalEarned: (user.totalEarned || 0) + videoReward,
+                        lastActive: Date.now()
+                    });
+                    
+                    showToast(`✅ Video completed! +$${videoReward} added!`, 'success');
+                    
+                } catch (error) {
+                    console.error('Error processing video ad:', error);
+                    showToast('Error processing video', 'danger');
+                }
+                
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                
+            }, 5000);
+        }
+
+        async function completeOffer(offerType) {
+            if (!userId) return;
+            
+            const rewards = {
+                survey: 2.00,
+                install: 5.00
+            };
+            
+            const reward = rewards[offerType] || 1.00;
+            
+            // Show confirmation
+            if (!confirm(`Complete ${offerType} offer for $${reward}?`)) return;
+            
+            showToast(`⏳ Processing ${offerType} offer...`, 'info');
+            
+            setTimeout(async () => {
+                try {
+                    const userRef = database.ref(`users/${userId}`);
+                    const snapshot = await userRef.once('value');
+                    const user = snapshot.val();
+                    
+                    const newBalance = (user.balance || 0) + reward;
+                    await userRef.update({
+                        balance: newBalance,
+                        totalEarned: (user.totalEarned || 0) + reward,
+                        lastActive: Date.now()
+                    });
+                    
+                    showToast(`✅ Offer completed! +$${reward} added!`, 'success');
+                    
+                } catch (error) {
+                    console.error('Error processing offer:', error);
+                    showToast('Error processing offer', 'danger');
+                }
+            }, 3000);
+        }
+
+        // ============================================
+        // DYNAMIC BUTTONS SYSTEM
+        // ============================================
+        async function loadDynamicButtons() {
+            try {
+                const snapshot = await database.ref('dynamicButtons').once('value');
+                dynamicButtons = [];
+                const container = document.getElementById('dynamicButtonsContainer');
+                container.innerHTML = '';
+                
+                snapshot.forEach((childSnapshot) => {
+                    const button = childSnapshot.val();
+                    button.id = childSnapshot.key;
+                    
+                    if (button.active) {
+                        dynamicButtons.push(button);
+                        
+                        const buttonElement = document.createElement('div');
+                        buttonElement.className = 'dynamic-button-card';
+                        buttonElement.style.borderColor = button.color || 'var(--primary)';
+                        buttonElement.innerHTML = `
+                            <div class="dynamic-button-icon" style="background: ${button.color || 'var(--primary)'}">
+                                <i class="${getButtonIcon(button.type)}"></i>
+                            </div>
+                            <div style="font-weight: 600; margin-bottom: 5px;">${button.title}</div>
+                            <div style="font-size: 12px; color: var(--success);">
+                                +$${button.reward || '0.00'}
+                            </div>
+                        `;
+                        
+                        buttonElement.onclick = () => handleDynamicButtonClick(button);
+                        container.appendChild(buttonElement);
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading dynamic buttons:', error);
+            }
+        }
+
+        function getButtonIcon(type) {
+            const icons = {
+                task: 'fas fa-tasks',
+                link: 'fas fa-external-link-alt',
+                reward: 'fas fa-gift',
+                ad: 'fas fa-ad'
+            };
+            return icons[type] || 'fas fa-star';
+        }
+
+        async function handleDynamicButtonClick(button) {
+            if (!userId || !userData) return;
+            
+            switch (button.type) {
+                case 'task':
+                    showToast(`Starting: ${button.title}`, 'info');
+                    // Simulate task completion
+                    setTimeout(async () => {
+                        await giveReward(button.reward, `Task: ${button.title}`);
+                        showToast(`✅ Task completed! +$${button.reward}`, 'success');
+                    }, 2000);
+                    break;
+                    
+                case 'link':
+                    if (button.link) {
+                        window.open(button.link, '_blank');
+                    }
+                    break;
+                    
+                case 'reward':
+                    await giveReward(button.reward, `Bonus: ${button.title}`);
+                    showToast(`🎁 Bonus received! +$${button.reward}`, 'success');
+                    break;
+                    
+                case 'ad':
+                    showToast(`Watching ad for $${button.reward}...`, 'info');
+                    setTimeout(async () => {
+                        await giveReward(button.reward, `Ad: ${button.title}`);
+                        showToast(`✅ Ad watched! +$${button.reward}`, 'success');
+                    }, 3000);
+                    break;
+            }
+        }
+
+        async function giveReward(amount, reason) {
+            try {
+                const userRef = database.ref(`users/${userId}`);
+                const snapshot = await userRef.once('value');
+                const user = snapshot.val();
+                
+                const newBalance = (user.balance || 0) + amount;
+                await userRef.update({
+                    balance: newBalance,
+                    totalEarned: (user.totalEarned || 0) + amount,
+                    lastActive: Date.now()
+                });
+                
+                // Record transaction
+                const transactionId = Date.now().toString();
+                await database.ref(`transactions/${transactionId}`).set({
+                    userId: userId,
+                    type: 'dynamic_button',
+                    amount: amount,
+                    reason: reason,
+                    timestamp: Date.now()
+                });
+                
+            } catch (error) {
+                console.error('Error giving reward:', error);
+            }
+        }
+
+        // ============================================
+        // TASK SYSTEM
         // ============================================
         async function loadTasks() {
             try {
@@ -1870,27 +2416,29 @@
                 snapshot.forEach((childSnapshot) => {
                     const task = childSnapshot.val();
                     task.id = childSnapshot.key;
-                    tasks.push(task);
-                    totalCount++;
-                    
-                    const taskElement = document.createElement('div');
-                    taskElement.className = 'task-card';
-                    taskElement.innerHTML = `
-                        <div class="task-icon">
-                            <i class="fas ${getTaskIcon(task.type)}"></i>
-                        </div>
-                        <div class="task-title">${task.title}</div>
-                        <div class="task-reward">
-                            <i class="fas fa-coins"></i> $${task.reward}
-                        </div>
-                        <button onclick="completeTask('${task.id}')" class="task-btn" id="taskBtn-${task.id}">
-                            <i class="fas fa-play"></i> Start
-                        </button>
-                    `;
-                    tasksList.appendChild(taskElement);
-                    
-                    // Check completion
-                    checkTaskCompletion(task.id);
+                    if (task.active !== false) {
+                        tasks.push(task);
+                        totalCount++;
+                        
+                        const taskElement = document.createElement('div');
+                        taskElement.className = 'task-card';
+                        taskElement.innerHTML = `
+                            <div class="task-icon">
+                                <i class="fas ${getTaskIcon(task.type)}"></i>
+                            </div>
+                            <div class="task-title">${task.title}</div>
+                            <div class="task-reward">
+                                <i class="fas fa-coins"></i> $${task.reward}
+                            </div>
+                            <button onclick="completeTask('${task.id}')" class="task-btn" id="taskBtn-${task.id}">
+                                <i class="fas fa-play"></i> Start
+                            </button>
+                        `;
+                        tasksList.appendChild(taskElement);
+                        
+                        // Check completion
+                        checkTaskCompletion(task.id);
+                    }
                 });
                 
                 document.getElementById('tasksCompleted').textContent = `${completedCount}/${totalCount}`;
@@ -1921,12 +2469,6 @@
                 if (taskData && taskData.completed) {
                     btn.innerHTML = '<i class="fas fa-check"></i> Completed';
                     btn.disabled = true;
-                    
-                    // Update completed count
-                    const completedText = document.getElementById('tasksCompleted').textContent;
-                    const [completed, total] = completedText.split('/').map(Number);
-                    document.getElementById('tasksCompleted').textContent = `${completed + 1}/${total}`;
-                    document.getElementById('tasksDone').textContent = completed + 1;
                 }
             } catch (error) {
                 console.error('Error checking task completion:', error);
@@ -1950,7 +2492,7 @@
             btn.disabled = true;
             
             try {
-                // Simulate task completion (in real app, verify with APIs)
+                // Simulate task completion
                 setTimeout(async () => {
                     await database.ref(`userTasks/${userId}/${taskId}`).set({
                         completed: true,
@@ -1970,10 +2512,10 @@
                     btn.innerHTML = '<i class="fas fa-check"></i> Completed';
                     btn.disabled = true;
                     
-                    showToast(`✅ Task completed! +$${task.reward}`, 'success');
+                    // Update tasks done counter
+                    document.getElementById('tasksDone').textContent = (parseInt(document.getElementById('tasksDone').textContent) || 0) + 1;
                     
-                    // Check if spins should be enabled
-                    checkSpinAvailability();
+                    showToast(`✅ Task completed! +$${task.reward}`, 'success');
                     
                 }, 2000);
                 
@@ -1986,7 +2528,7 @@
         }
 
         async function checkMandatoryTasks() {
-            if (!userId) return true; // Temporarily disabled for testing
+            if (!userId) return true;
             
             try {
                 const userTasksSnapshot = await database.ref(`userTasks/${userId}`).once('value');
@@ -2007,12 +2549,12 @@
                 return allMandatoryCompleted;
             } catch (error) {
                 console.error('Error checking mandatory tasks:', error);
-                return true; // Return true on error to not block users
+                return true;
             }
         }
 
         // ============================================
-        // WITHDRAWAL SYSTEM (FIXED)
+        // WITHDRAWAL SYSTEM
         // ============================================
         async function submitWithdrawal() {
             if (!userId || !userData) return;
@@ -2025,6 +2567,13 @@
             
             if (userData.maintenanceBlocked) {
                 showToast('Withdrawals temporarily blocked', 'warning');
+                return;
+            }
+            
+            // Check system status
+            const statusSnapshot = await database.ref('system/status/withdrawEnabled').once('value');
+            if (statusSnapshot.exists() && !statusSnapshot.val()) {
+                showToast('Withdrawals are currently disabled', 'warning');
                 return;
             }
             
@@ -2146,7 +2695,7 @@
         }
 
         // ============================================
-        // NOTIFICATION SYSTEM (FIXED)
+        // NOTIFICATION SYSTEM
         // ============================================
         async function loadNotifications() {
             if (!userId) return;
@@ -2311,6 +2860,86 @@
             }
         }
 
+        async function clearAllNotifications() {
+            if (!userId || !confirm('Clear all notifications?')) return;
+            
+            try {
+                await database.ref(`notifications/${userId}`).remove();
+                showToast('All notifications cleared!', 'success');
+                loadNotifications();
+            } catch (error) {
+                console.error('Error clearing notifications:', error);
+                showToast('Error clearing notifications', 'danger');
+            }
+        }
+
+        // ============================================
+        // REFERRAL SYSTEM
+        // ============================================
+        function generateReferralCode() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        async function loadReferralLink() {
+            if (!userId || !userData) return;
+            
+            const referralCode = userData.referralCode || generateReferralCode();
+            const referralLink = `${window.location.origin}${window.location.pathname}?ref=${referralCode}`;
+            
+            document.getElementById('referralLink').textContent = referralLink;
+        }
+
+        function copyReferralLink() {
+            const referralLink = document.getElementById('referralLink').textContent;
+            navigator.clipboard.writeText(referralLink).then(() => {
+                showToast('Referral link copied!', 'success');
+            });
+        }
+
+        async function handleReferral(referrerCode) {
+            if (!userId || referrerCode === userData.referralCode) return;
+            
+            try {
+                // Find user with this referral code
+                const snapshot = await database.ref('users').orderByChild('referralCode').equalTo(referrerCode).once('value');
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        const referrerId = childSnapshot.key;
+                        const referrerData = childSnapshot.val();
+                        
+                        // Give bonus to both users
+                        const bonus = 1.00;
+                        
+                        // Update referrer
+                        database.ref(`users/${referrerId}`).update({
+                            balance: (referrerData.balance || 0) + bonus,
+                            totalEarned: (referrerData.totalEarned || 0) + bonus,
+                            referrals: (referrerData.referrals || 0) + 1
+                        });
+                        
+                        // Update referred user
+                        database.ref(`users/${userId}`).update({
+                            referredBy: referrerId,
+                            referralBonus: bonus
+                        });
+                        
+                        // Record referral
+                        const referralId = Date.now().toString();
+                        database.ref(`referrals/${referralId}`).set({
+                            referrer: referrerId,
+                            referred: userId,
+                            bonus: bonus,
+                            timestamp: Date.now()
+                        });
+                        
+                        showToast(`🎉 You got $${bonus} referral bonus!`, 'success');
+                    });
+                }
+            } catch (error) {
+                console.error('Error handling referral:', error);
+            }
+        }
+
         // ============================================
         // UI FUNCTIONS
         // ============================================
@@ -2346,6 +2975,10 @@
                 markAllAsRead();
             } else if (sectionId === 'withdraw') {
                 loadWithdrawHistory();
+            } else if (sectionId === 'tasks') {
+                loadTasks();
+            } else if (sectionId === 'game') {
+                loadDynamicButtons();
             }
         }
 
@@ -2414,6 +3047,13 @@
             
             // Check maintenance mode every 2 minutes
             setInterval(checkMaintenance, 120000);
+            
+            // Check for new dynamic buttons every 5 minutes
+            setInterval(() => {
+                if (isLoggedIn) {
+                    loadDynamicButtons();
+                }
+            }, 300000);
         }
 
         async function updateOnlineStatus() {
