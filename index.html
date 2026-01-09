@@ -2,311 +2,1441 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Spin & Win BD</title>
-    <!-- Telegram Web App -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Game Bot</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         :root {
-            --bg: #0d1117;
-            --primary: #00f3ff;
-            --secondary: #7000ff;
+            --primary: #00d9ff;
+            --primary-dark: #0099cc;
+            --secondary: #ff00ff;
+            --secondary-dark: #cc00cc;
+            --dark: #0a0a14;
+            --darker: #050510;
+            --card-bg: #151522;
             --text: #ffffff;
-            --danger: #ff2a6d;
+            --text-secondary: #b0b0d0;
             --success: #00ff88;
-            --warning: #ffb700;
-            --telegram: #0088cc;
+            --danger: #ff5555;
+            --warning: #ffaa00;
+            --border: #2a2a3a;
+            --shadow: rgba(0, 217, 255, 0.1);
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+            --gradient-dark: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
         }
-        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            margin: 0; padding: 0; width: 100vw; height: 100vh;
-            background: radial-gradient(circle at center, #1a1f35 0%, #05070a 100%);
-            font-family: 'Poppins', sans-serif; color: var(--text);
-            display: flex; flex-direction: column; overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--darker);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loader {
+            width: 80px;
+            height: 80px;
+            border: 5px solid var(--border);
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            font-family: 'Poppins', sans-serif;
+            font-size: 20px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-top: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Login Screen */
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--darker) 0%, #0f0f1a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-screen::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(0, 217, 255, 0.1) 0%, transparent 70%);
+            top: -150px;
+            right: -150px;
+            border-radius: 50%;
+        }
+
+        .login-screen::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 0, 255, 0.1) 0%, transparent 70%);
+            bottom: -150px;
+            left: -150px;
+            border-radius: 50%;
+        }
+
+        .login-container {
+            background: rgba(21, 21, 34, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-large {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-large i {
+            font-size: 60px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .logo-large h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 36px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-large p {
+            color: var(--text-secondary);
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--gradient);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-features {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .feature i {
+            color: var(--primary);
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .feature span {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Main App */
+        .app-container {
+            display: none;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 15px;
+            padding-bottom: 80px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         /* Header */
-        .header { padding: 15px; width: 100%; z-index: 10; display: flex; justify-content: space-between; align-items: center; position: absolute; top:0; left:0;}
-        .user-badge {
-            background: rgba(0, 243, 255, 0.1); border: 1px solid var(--primary);
-            padding: 5px 12px; border-radius: 20px; font-size: 11px; color: var(--primary);
-            backdrop-filter: blur(4px);
-        }
-        .pool-badge {
-            background: rgba(255, 183, 0, 0.15); border: 1px solid var(--warning);
-            padding: 5px 12px; border-radius: 20px; font-size: 11px; color: var(--warning);
-            backdrop-filter: blur(4px);
-        }
-
-        /* Admin Trigger */
-        .admin-trigger {
-            position: absolute; top: 60px; right: 15px; 
-            opacity: 0.5; font-size: 24px; cursor: pointer; z-index: 200;
-            color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        .app-header {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px var(--shadow);
+            position: relative;
+            overflow: hidden;
         }
 
-        /* Maintenance Screen */
-        .maintenance-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 7, 10, 0.98); z-index: 150;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 20px;
-        }
-        .m-icon { font-size: 60px; color: var(--warning); margin-bottom: 20px; animation: pulse 2s infinite; }
-        .m-title { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 10px; }
-        .m-desc { color: #aaa; font-size: 14px; max-width: 300px; line-height: 1.6; }
-
-        @keyframes pulse { 0% { opacity: 0.5; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0.5; transform: scale(0.95); } }
-
-        /* Wheel Section */
-        .game-area {
-            flex: 0 0 auto; display: flex; justify-content: center; align-items: center;
-            position: relative; margin-top: 60px; margin-bottom: 10px;
-        }
-        .wheel-container {
-            width: 290px; height: 290px; border-radius: 50%; padding: 6px;
-            background: conic-gradient(from 0deg, var(--secondary), var(--primary), var(--secondary));
-            box-shadow: 0 0 35px rgba(0, 243, 255, 0.2); position: relative;
-        }
-        .marker {
-            position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
-            width: 40px; height: 50px; z-index: 5; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5));
-        }
-        .marker::after {
-            content: ''; position: absolute; left: 50%; transform: translateX(-50%);
-            border-left: 18px solid transparent; border-right: 18px solid transparent; 
-            border-top: 40px solid #fff;
-        }
-        canvas { display: block; width: 100%; height: 100%; border-radius: 50%; background: #000; }
-
-        /* Controls */
-        .controls {
-            padding: 5px; width: 100%; display: flex; flex-direction: column;
-            align-items: center; z-index: 20;
-        }
-        
-        .timer-box {
-            font-size: 14px; color: var(--danger); font-weight: 700;
-            margin-bottom: 10px; height: 20px; text-shadow: 0 0 10px rgba(255, 42, 109, 0.4);
+        .app-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient);
         }
 
-        .spin-btn {
-            background: linear-gradient(90deg, var(--primary), #00c3cc); color: #000; border: none;
-            width: 80%; padding: 14px; font-size: 18px; font-weight: 800; letter-spacing: 1px;
-            border-radius: 15px; text-transform: uppercase; cursor: pointer;
-            box-shadow: 0 0 25px rgba(0, 243, 255, 0.3); transition: transform 0.1s;
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
-        .spin-btn:active { transform: scale(0.96); }
-        .spin-btn:disabled { background: #222; color: #555; box-shadow: none; cursor: not-allowed; }
 
-        /* Live Leaderboard */
-        .live-feed {
-            flex: 1; width: 92%; margin: 15px auto 5px; 
-            background: rgba(20, 25, 40, 0.6); border: 1px solid #333; border-radius: 12px;
-            overflow: hidden; display: flex; flex-direction: column; backdrop-filter: blur(5px);
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            border: 3px solid var(--primary-dark);
         }
-        .feed-header {
-            background: rgba(0,0,0,0.3); padding: 10px; font-size: 12px; font-weight: 700;
-            display: flex; justify-content: space-between; border-bottom: 1px solid #333; color: var(--primary);
+
+        .user-info {
+            flex: 1;
         }
-        .feed-list { flex: 1; overflow-y: auto; padding: 0; }
-        
-        .feed-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.05);
+
+        .user-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .user-id {
             font-size: 12px;
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3px 8px;
+            border-radius: 10px;
+            display: inline-block;
         }
-        .feed-user { color: #ddd; font-weight: 500; display: flex; gap: 5px; align-items: center; }
-        .feed-id { color: #666; font-size: 10px; }
-        
-        /* New Feed Styles for Time */
-        .feed-right { text-align: right; }
-        .feed-prize { font-weight: bold; display: block; }
-        .feed-time { font-size: 9px; color: #888; margin-top: 2px; }
+
+        .wallet-card {
+            background: var(--gradient-dark);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 15px;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 217, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 217, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 217, 255, 0); }
+        }
+
+        .wallet-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 5px;
+        }
+
+        .balance {
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Quick Stats */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            color: var(--primary);
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Main Content */
+        .content-section {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px var(--shadow);
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Game Wheel */
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 30px;
+            perspective: 1000px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 8px solid var(--primary);
+            background: var(--darker);
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            transform-style: preserve-3d;
+        }
+
+        .wheel-segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            background: linear-gradient(var(--angle), var(--color1), var(--color2));
+            clip-path: polygon(100% 100%, 0% 100%, 100% 0%);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70px;
+            height: 70px;
+            background: var(--gradient);
+            border-radius: 50%;
+            border: 5px solid var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+            font-family: 'Poppins', sans-serif;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .wheel-center:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
+        }
+
+        .wheel-center:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+
+        .spin-info {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .info-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            color: var(--primary);
+        }
+
+        /* Tasks */
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .task-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 25px var(--shadow);
+        }
+
+        .task-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 20px;
+            color: white;
+        }
+
+        .task-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .task-reward {
+            color: var(--success);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .task-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--gradient);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .task-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 217, 255, 0.3);
+        }
+
+        .task-btn.completed {
+            background: var(--success);
+            cursor: not-allowed;
+        }
+
+        /* Withdraw Form */
+        .withdraw-form {
+            display: grid;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 18px 18px 18px 50px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.2);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 18px 18px 18px 50px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2300d9ff' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+        }
+
+        .btn {
+            padding: 18px 30px;
+            border: none;
+            border-radius: 15px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--gradient-dark);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Notifications */
+        .notifications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .notification-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .notification-item:hover {
+            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .notification-item.unread {
+            border-left-color: var(--warning);
+            background: rgba(255, 170, 0, 0.1);
+        }
+
+        .notification-item.reward {
+            border-left-color: var(--success);
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .notification-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            color: var(--primary);
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .notification-message {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        /* History */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .history-table th {
+            text-align: left;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--primary);
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .history-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .history-table tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            display: flex;
+            padding: 10px;
+            z-index: 1000;
+            max-width: 500px;
+            margin: 0 auto;
+            border-radius: 25px 25px 0 0;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 15px 10px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(0, 217, 255, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .nav-item i {
+            font-size: 22px;
+        }
+
+        .nav-item span {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .nav-badge {
+            position: absolute;
+            top: 5px;
+            right: 20%;
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+            font-weight: 600;
+        }
 
         /* Modals */
         .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); backdrop-filter: blur(8px);
-            display: none; align-items: center; justify-content: center; z-index: 250;
-        }
-        .modal.active { display: flex; }
-        .modal-box {
-            background: #151a27; border: 1px solid #333; box-shadow: 0 0 50px rgba(0,0,0,0.8);
-            padding: 25px; border-radius: 20px; width: 90%; max-width: 380px;
-            text-align: center; max-height: 90vh; overflow-y: auto; color: #fff;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
         }
 
-        /* Join Modal Specifics */
-        .join-btn-link {
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            width: 100%; padding: 12px; margin: 8px 0;
-            background: rgba(0, 136, 204, 0.15); border: 1px solid var(--telegram);
-            color: #fff; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 14px;
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 25px;
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0, 217, 255, 0.2);
+            text-align: center;
+            animation: scaleIn 0.3s ease;
         }
-        .join-btn-link:hover { background: rgba(0, 136, 204, 0.3); }
-        .verify-btn {
-            background: var(--success); color: #000; margin-top: 15px;
-        }
-        
-        input, select {
-            width: 100%; padding: 12px; margin: 6px 0 12px;
-            background: #080a10; border: 1px solid #333; color: #fff; border-radius: 8px; font-size: 13px;
-        }
-        input:focus { border-color: var(--primary); outline: none; }
-        label { display: block; text-align: left; font-size: 11px; color: #aaa; margin-top: 5px; font-weight: 600; }
 
-        .btn-s { padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; font-size: 14px;}
-        .btn-ok { background: var(--primary); color: #000; }
-        .btn-close { background: #222; color: #fff; border: 1px solid #333; }
-        
-        /* Toggle Switch */
-        .toggle-box { display: flex; justify-content: space-between; align-items: center; background: #080a10; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 15px; }
-        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--warning); }
-        input:checked + .slider:before { transform: translateX(18px); }
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
 
+        .modal-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .modal-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .modal-message {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+        }
+
+        /* Achievements */
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .achievement-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .achievement-card.locked {
+            opacity: 0.5;
+            filter: grayscale(1);
+        }
+
+        .achievement-card.unlocked {
+            border-color: var(--success);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        }
+
+        .achievement-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 20px;
+            color: white;
+        }
+
+        .achievement-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .achievement-reward {
+            font-size: 12px;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        /* Leaderboard */
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid var(--border);
+        }
+
+        .rank {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-family: 'Poppins', sans-serif;
+            color: white;
+        }
+
+        .rank-1 { background: gold; }
+        .rank-2 { background: silver; }
+        .rank-3 { background: #cd7f32; }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .player-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+        }
+
+        .player-balance {
+            font-size: 14px;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        /* Animations */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .shake {
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .wheel-container {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .wheel-center {
+                width: 60px;
+                height: 60px;
+                font-size: 16px;
+            }
+            
+            .login-container {
+                padding: 30px 20px;
+            }
+            
+            .logo-large h1 {
+                font-size: 28px;
+            }
+            
+            .quick-stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .tasks-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
-
-    <!-- Maintenance Overlay -->
-    <div id="maintenanceScreen" class="maintenance-overlay">
-        <i class="fas fa-tools m-icon"></i>
-        <div class="m-title">MAINTENANCE MODE</div>
-        <div class="m-desc">We are currently updating our reward system. Please check back later!</div>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loader"></div>
+        <div class="loading-text">Loading Game Bot...</div>
     </div>
 
-    <div class="header">
-        <span id="userInfo" class="user-badge"><i class="fas fa-user"></i> Loading...</span>
-        <span id="poolStatus" class="pool-badge"><i class="fas fa-chart-pie"></i> Pool: 0/0</span>
-    </div>
-
-    <!-- Admin Gear -->
-    <div class="admin-trigger" onclick="window.openAdminLogin()"><i class="fas fa-cog fa-spin-hover"></i></div>
-
-    <div class="game-area">
-        <div class="wheel-container">
-            <div class="marker"></div>
-            <canvas id="wheelCanvas" width="600" height="600"></canvas>
-        </div>
-    </div>
-
-    <div class="controls">
-        <div id="timerDisplay" class="timer-box"></div>
-        <button id="spinBtn" class="spin-btn">SPIN NOW</button>
-    </div>
-
-    <!-- Live Leaderboard -->
-    <div class="live-feed">
-        <div class="feed-header">
-            <span><i class="fas fa-broadcast-tower"></i> LIVE WINNERS</span>
-        </div>
-        <div id="feedList" class="feed-list">
-            <div style="text-align:center; padding:15px; color:#555; font-size:12px;">Waiting for spins...</div>
-        </div>
-    </div>
-
-    <!-- Join Required Modal -->
-    <div id="modalJoin" class="modal">
-        <div class="modal-box">
-            <h2 style="color: var(--primary); margin-top:0;">🚀 JOIN TO SPIN</h2>
-            <p style="font-size: 13px; color: #ccc;">You must join our channels to participate in the giveaway.</p>
-            
-            <a id="btnChannel" href="#" target="_blank" class="join-btn-link">
-                <i class="fab fa-telegram-plane"></i> Join Channel
-            </a>
-            <a id="btnGroup" href="#" target="_blank" class="join-btn-link">
-                <i class="fas fa-users"></i> Join Group
-            </a>
-
-            <button class="btn-s verify-btn" onclick="window.verifyJoin()">✅ I HAVE JOINED</button>
-        </div>
-    </div>
-
-    <!-- Admin Login -->
-    <div id="modalAuth" class="modal">
-        <div class="modal-box" style="max-width: 320px;">
-            <h3 style="margin-top:0">Admin Access</h3>
-            <input type="password" id="adminPassInput" placeholder="••••••">
-            <button class="btn-s btn-ok" onclick="window.verifyAdmin()">LOGIN</button>
-            <button class="btn-s btn-close" onclick="document.getElementById('modalAuth').classList.remove('active')">CANCEL</button>
-        </div>
-    </div>
-
-    <!-- Admin Panel -->
-    <div id="modalAdmin" class="modal">
-        <div class="modal-box" style="text-align: left;">
-            <h3 style="text-align: center; margin: 0 0 15px; border-bottom:1px solid #333; padding-bottom:10px;">Admin Config</h3>
-            
-            <div class="toggle-box">
-                <span style="font-size:13px; font-weight:bold; color:var(--warning);">Maintenance Mode</span>
-                <label class="switch">
-                    <input type="checkbox" id="cfgMaintenance">
-                    <span class="slider"></span>
-                </label>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="logo-large">
+                <i class="fas fa-robot"></i>
+                <h1>Game Bot</h1>
+                <p>Spin • Earn • Withdraw</p>
             </div>
-
-            <!-- Join Links -->
-            <label style="color: var(--telegram);">Mandatory Channel Link</label>
-            <input type="text" id="cfgChannel" placeholder="https://t.me/YourChannel">
-            <label style="color: var(--telegram);">Mandatory Group Link</label>
-            <input type="text" id="cfgGroup" placeholder="https://t.me/YourGroup">
-
-            <div style="background: #0d1117; padding: 12px; border-radius: 10px; margin-bottom: 12px; border:1px solid #333;">
-                <label style="margin-top:0">Pool Limit</label>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <input type="number" id="cfgMaxLimit" style="margin:0">
-                    <button class="btn-s" style="width:auto; margin:0; font-size:11px; padding:10px; background:#333;" onclick="window.resetPoolCount()">Reset (0)</button>
+            
+            <button onclick="startTelegramLogin()" class="login-btn" id="loginButton">
+                <i class="fab fa-telegram"></i>
+                Login with Telegram
+            </button>
+            
+            <div class="login-features">
+                <div class="feature">
+                    <i class="fas fa-coins"></i>
+                    <span>Daily Rewards</span>
                 </div>
-                <div style="font-size:11px; color:#666; margin-top:5px; text-align:right;">Current Spins: <span id="admCurSpins">0</span></div>
+                <div class="feature">
+                    <i class="fas fa-gamepad"></i>
+                    <span>Spin & Win</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-tasks"></i>
+                    <span>Complete Tasks</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-wallet"></i>
+                    <span>Instant Withdraw</span>
+                </div>
             </div>
-
-            <label>Add Prize</label>
-            <div style="display: flex; gap: 5px;">
-                <input type="text" id="newPrizeName" placeholder="Name" style="flex: 2;">
-                <select id="newPrizeType" style="flex: 1; background:#000;">
-                    <option value="win">Win</option>
-                    <option value="lose">Lose</option>
-                </select>
-            </div>
-            <button class="btn-s" style="background:var(--secondary); color:#fff; margin-top:0;" onclick="window.addItem()">+ Add Item</button>
             
-            <div id="prizeListContainer" style="max-height: 100px; overflow-y:auto; margin:10px 0; border:1px solid #333; padding:5px; border-radius:5px;"></div>
-
-            <label>Bot Token</label><input type="text" id="cfgToken">
-            <label>Chat ID</label><input type="text" id="cfgChatId">
-            <label>Win Chance %</label><input type="number" id="cfgChance">
-            <label>Password</label><input type="text" id="cfgNewPass">
-
-            <button class="btn-s btn-ok" onclick="window.saveSettings()">SAVE ALL CHANGES</button>
-            <button class="btn-s btn-close" onclick="document.getElementById('modalAdmin').classList.remove('active')">CLOSE</button>
+            <p style="text-align: center; color: var(--text-secondary); margin-top: 30px; font-size: 12px;">
+                <i class="fas fa-shield-alt"></i> Secure & Trusted Platform
+            </p>
         </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="appContainer" class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="user-profile">
+                <div class="avatar" id="userAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name" id="userName">Loading...</div>
+                    <div class="user-id" id="userId">ID: 000000</div>
+                </div>
+                <button onclick="showProfileModal()" class="btn btn-secondary" style="padding: 10px 15px;">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+            
+            <div class="wallet-card">
+                <div class="wallet-label">Your Balance</div>
+                <div class="balance" id="userBalance">$0.00</div>
+            </div>
+        </header>
+
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+            <div class="stat-item">
+                <div class="stat-label">Spins Today</div>
+                <div class="stat-value" id="spinsToday">0/10</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Online</div>
+                <div class="stat-value" id="onlineCount">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Win Rate</div>
+                <div class="stat-value" id="winRate">0%</div>
+            </div>
+        </div>
+
+        <!-- Game Section -->
+        <section id="gameSection" class="content-section">
+            <h2 class="section-title">
+                <i class="fas fa-gamepad"></i> Spin Wheel
+            </h2>
+            
+            <div class="wheel-container">
+                <div class="wheel" id="wheel">
+                    <!-- Wheel segments will be generated by JavaScript -->
+                </div>
+                <div class="wheel-center" onclick="spinWheel()" id="spinButton">
+                    SPIN
+                </div>
+            </div>
+            
+            <div class="spin-info">
+                <div class="info-item">
+                    <div class="info-label">Spins Left</div>
+                    <div class="info-value" id="spinsLeft">10</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Cooldown</div>
+                    <div class="info-value" id="cooldownTimer">Ready</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Win Chance</div>
+                    <div class="info-value" id="winChance">30%</div>
+                </div>
+            </div>
+            
+            <p style="text-align: center; color: var(--text-secondary); margin-top: 20px; font-size: 14px;">
+                <i class="fas fa-info-circle"></i> Complete tasks to unlock more spins!
+            </p>
+        </section>
+
+        <!-- Tasks Section -->
+        <section id="tasksSection" class="content-section" style="display: none;">
+            <h2 class="section-title">
+                <i class="fas fa-tasks"></i> Earn More
+                <span style="margin-left: auto; font-size: 14px; color: var(--success);" id="tasksCompleted">0/0 Completed</span>
+            </h2>
+            
+            <div class="tasks-grid" id="tasksList">
+                <!-- Tasks will be loaded here -->
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="showAllTasks()" class="btn btn-secondary">
+                    <i class="fas fa-list"></i> View All Tasks
+                </button>
+            </div>
+        </section>
+
+        <!-- Withdraw Section -->
+        <section id="withdrawSection" class="content-section" style="display: none;">
+            <h2 class="section-title">
+                <i class="fas fa-wallet"></i> Withdraw Earnings
+            </h2>
+            
+            <div class="withdraw-form">
+                <div class="form-group">
+                    <label class="form-label">
+                        <span>Amount to Withdraw</span>
+                        <span id="minAmount">Min: $10</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-dollar-sign input-icon"></i>
+                        <input type="number" id="withdrawAmount" class="form-input" 
+                               placeholder="Enter amount" min="10" step="0.01">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Payment Method</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-credit-card input-icon"></i>
+                        <select id="withdrawMethod" class="form-select">
+                            <option value="">Select method</option>
+                            <option value="PayPal">PayPal</option>
+                            <option value="Bkash">Bkash</option>
+                            <option value="Payoneer">Payoneer</option>
+                            <option value="Bank">Bank Transfer</option>
+                            <option value="Crypto">Crypto</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Account Details</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" id="withdrawDetails" class="form-input" 
+                               placeholder="Your account ID/email/address">
+                    </div>
+                </div>
+                
+                <button onclick="submitWithdrawal()" class="btn btn-primary" id="withdrawBtn">
+                    <i class="fas fa-paper-plane"></i> Submit Withdrawal Request
+                </button>
+            </div>
+            
+            <h3 class="section-title" style="margin-top: 30px; font-size: 16px;">
+                <i class="fas fa-history"></i> Recent Withdrawals
+            </h3>
+            <div class="table-container">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="withdrawHistory">
+                        <!-- History will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Notifications Section -->
+        <section id="notificationsSection" class="content-section" style="display: none;">
+            <h2 class="section-title">
+                <i class="fas fa-bell"></i> Notifications
+                <span class="nav-badge" id="notificationBadge" style="position: static; margin-left: 10px;">0</span>
+            </h2>
+            
+            <div class="notifications-list" id="notificationsList">
+                <!-- Notifications will be loaded here -->
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="markAllAsRead()" class="btn btn-secondary">
+                    <i class="fas fa-check-double"></i> Mark All as Read
+                </button>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section id="profileSection" class="content-section" style="display: none;">
+            <h2 class="section-title">
+                <i class="fas fa-user-circle"></i> My Profile
+            </h2>
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div class="avatar" style="width: 100px; height: 100px; margin: 0 auto 20px; font-size: 40px;">
+                    <i class="fas fa-user" id="profileAvatar"></i>
+                </div>
+                <h3 id="profileName" style="font-family: 'Poppins', sans-serif; font-size: 24px;"></h3>
+                <p style="color: var(--text-secondary);" id="profileId"></p>
+            </div>
+            
+            <div class="quick-stats" style="margin-bottom: 30px;">
+                <div class="stat-item">
+                    <div class="stat-label">Total Earned</div>
+                    <div class="stat-value" id="totalEarned">$0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Total Withdrawn</div>
+                    <div class="stat-value" id="totalWithdrawn">$0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Win Rate</div>
+                    <div class="stat-value" id="profileWinRate">0%</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Daily Goal</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-bullseye input-icon"></i>
+                    <input type="number" id="dailyGoal" class="form-input" 
+                           placeholder="Set your daily earning goal" min="0" step="0.01">
+                </div>
+            </div>
+            
+            <button onclick="saveProfileSettings()" class="btn btn-primary" style="margin-top: 20px;">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+            
+            <button onclick="logout()" class="btn btn-danger" style="margin-top: 15px; width: 100%;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </section>
+
+        <!-- Navigation -->
+        <nav class="bottom-nav">
+            <a href="#game" class="nav-item active" onclick="showSection('game')">
+                <i class="fas fa-gamepad"></i>
+                <span>Spin</span>
+            </a>
+            <a href="#tasks" class="nav-item" onclick="showSection('tasks')">
+                <i class="fas fa-tasks"></i>
+                <span>Earn</span>
+            </a>
+            <a href="#withdraw" class="nav-item" onclick="showSection('withdraw')">
+                <i class="fas fa-wallet"></i>
+                <span>Cashout</span>
+            </a>
+            <a href="#notifications" class="nav-item" onclick="showSection('notifications')">
+                <i class="fas fa-bell"></i>
+                <span>Alerts</span>
+                <span class="nav-badge" id="navNotificationBadge">0</span>
+            </a>
+            <a href="#profile" class="nav-item" onclick="showSection('profile')">
+                <i class="fas fa-user"></i>
+                <span>Me</span>
+            </a>
+        </nav>
     </div>
 
     <!-- Result Modal -->
-    <div id="modalRes" class="modal">
-        <div class="modal-box">
-            <h1 id="resEmoji" style="font-size: 60px; margin: 10px 0;"></h1>
-            <h2 id="resTitle" style="margin:5px 0;"></h2>
-            <p id="resDesc" style="color: #ccc; font-size: 14px; margin-bottom: 20px;"></p>
-            <button class="btn-s btn-ok" onclick="document.getElementById('modalRes').classList.remove('active')">AWESOME</button>
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon" id="resultIcon">🎉</div>
+            <h2 class="modal-title" id="resultTitle">Congratulations!</h2>
+            <div class="modal-message" id="resultMessage">You won!</div>
+            <div style="font-size: 48px; font-weight: 700; color: var(--success); margin: 20px 0;" id="resultAmount">
+                +$0.00
+            </div>
+            <div class="modal-actions">
+                <button onclick="closeResultModal()" class="btn btn-primary">
+                    <i class="fas fa-gamepad"></i> Spin Again
+                </button>
+                <button onclick="shareResult()" class="btn btn-secondary">
+                    <i class="fas fa-share"></i> Share
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- FIREBASE LOGIC -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getDatabase, ref, onValue, set, update, get } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+    <!-- Reward Modal -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon">🎁</div>
+            <h2 class="modal-title">Claim Your Reward!</h2>
+            <div class="modal-message" id="rewardMessage">You have a reward waiting for you!</div>
+            <div style="font-size: 32px; font-weight: 700; color: var(--success); margin: 20px 0;" id="rewardAmount">
+                $0.00
+            </div>
+            <div class="modal-actions">
+                <button onclick="claimReward()" class="btn btn-success">
+                    <i class="fas fa-gift"></i> Claim Now
+                </button>
+                <button onclick="closeRewardModal()" class="btn btn-secondary">
+                    Later
+                </button>
+            </div>
+        </div>
+    </div>
 
-        // === REPLACE WITH YOUR CONFIG ===
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Settings</h2>
+            
+            <div class="form-group" style="margin-top: 20px;">
+                <label class="form-label">Daily Spin Limit</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-sync input-icon"></i>
+                    <input type="number" id="userSpinLimit" class="form-input" value="10" min="1" max="50">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <input type="checkbox" id="soundEnabled" checked>
+                    Enable Sounds
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <input type="checkbox" id="notificationsEnabled" checked>
+                    Push Notifications
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Theme</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-palette input-icon"></i>
+                    <select id="themeSelect" class="form-select">
+                        <option value="dark">Dark Neon</option>
+                        <option value="blue">Blue Ocean</option>
+                        <option value="purple">Purple Dream</option>
+                        <option value="green">Green Matrix</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button onclick="saveSettings()" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <button onclick="closeProfileModal()" class="btn btn-secondary">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement Modal -->
+    <div id="achievementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon">🏆</div>
+            <h2 class="modal-title">Achievement Unlocked!</h2>
+            <div class="modal-message" id="achievementMessage"></div>
+            <div style="font-size: 32px; font-weight: 700; color: var(--success); margin: 20px 0;" id="achievementReward">
+                +$0.00
+            </div>
+            <button onclick="closeAchievementModal()" class="btn btn-primary">
+                Awesome!
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        const tg = window.Telegram.WebApp;
         const firebaseConfig = {
             apiKey: "AIzaSyCqhlpl7ot8Kuq_poxWNJPUBUvFvy-Qgls",
             authDomain: "allgame-arena.firebaseapp.com",
@@ -317,401 +1447,1207 @@
             appId: "1:956752654560:web:8cab97192d14dcab20e085"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-        // State
-        let appConfig = { prizes: [], totalSpins: 0, maxLimit: 50, maintenance: false, channelLink: "", groupLink: "" }; 
-        let currentUser = null;
-        let canSpin = false;
-        let tempPrizes = [];
-        let isPoolFull = false;
-        let hasJoined = false; 
-        const COOLDOWN_HOURS = 24;
+        let userId = null;
+        let userData = null;
+        let userStats = null;
+        let wheelSpinning = false;
+        let tasks = [];
+        let notifications = [];
+        let achievements = [];
+        let spinCooldown = 0;
+        let winChance = 30;
+        let isLoggedIn = false;
 
-        // Init Telegram
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        
-        if (tg.initDataUnsafe?.user) {
-            currentUser = tg.initDataUnsafe.user;
-            const nameDisplay = currentUser.first_name.length > 10 ? currentUser.first_name.substring(0, 10)+'..' : currentUser.first_name;
-            document.getElementById('userInfo').innerHTML = `<i class="fas fa-user"></i> ${nameDisplay}`;
-        } else {
-            currentUser = { id: 12345678, first_name: "GuestUser", username: "guest" };
-            document.getElementById('userInfo').innerHTML = `<i class="fas fa-user-secret"></i> Guest`;
-        }
-
-        // Check local storage for join status
-        if(localStorage.getItem('joined_community') === 'true') {
-            hasJoined = true;
-        }
-
-        // Elements
-        const canvas = document.getElementById('wheelCanvas');
-        const ctx = canvas.getContext('2d');
-        const btn = document.getElementById('spinBtn');
-        const timerTxt = document.getElementById('timerDisplay');
-        const poolBadge = document.getElementById('poolStatus');
-        const maintenanceScreen = document.getElementById('maintenanceScreen');
-        const btnChannel = document.getElementById('btnChannel');
-        const btnGroup = document.getElementById('btnGroup');
-
-        // ===================================
-        // 1. CONFIG LISTENER
-        // ===================================
-        onValue(ref(db, 'config'), (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                appConfig = data;
-                if(!appConfig.prizes) appConfig.prizes = [{name:"Empty", type:"lose"}];
-                
-                // Update Join Links
-                btnChannel.href = appConfig.channelLink || "#";
-                btnGroup.href = appConfig.groupLink || "#";
-
-                // Maintenance
-                maintenanceScreen.style.display = appConfig.maintenance === true ? 'flex' : 'none';
-
-                // Pool
-                const used = appConfig.totalSpins || 0;
-                const limit = appConfig.maxLimit || 100;
-                poolBadge.innerText = `Pool: ${used}/${limit}`;
-                
-                if (used >= limit) {
-                    isPoolFull = true;
-                    btn.innerText = "POOL FILLED";
-                    btn.disabled = true;
-                    poolBadge.style.color = "var(--danger)";
-                } else {
-                    isPoolFull = false;
-                    poolBadge.style.color = "var(--warning)";
-                    checkUserStatus(); 
-                }
-                drawWheel();
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check if already logged in
+            const savedLogin = localStorage.getItem('telegram_bot_login');
+            if (savedLogin === 'true') {
+                await initializeUser();
             } else {
-                window.createDefaultConfig();
+                // Show login screen after loading
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('loadingScreen').style.display = 'none';
+                        document.getElementById('loginScreen').style.display = 'flex';
+                    }, 500);
+                }, 1500);
             }
         });
 
-        // ===================================
-        // 2. LIVE LEADERBOARD (WITH TIME)
-        // ===================================
-        onValue(ref(db, 'users'), (snapshot) => {
-            const users = snapshot.val();
-            if(!users) return;
-            const userArray = Object.values(users);
-            userArray.sort((a, b) => (b.lastSpin || 0) - (a.lastSpin || 0));
-            const feedList = document.getElementById('feedList');
-            feedList.innerHTML = "";
-            
-            userArray.slice(0, 30).forEach(u => {
-                if(u.lastReward) {
-                    const div = document.createElement('div');
-                    div.className = "feed-item";
-                    const idStr = u.id ? `..${String(u.id).slice(-4)}` : '';
-                    
-                    // Format Time (e.g. 10:30 PM)
-                    let timeStr = "";
-                    if(u.lastSpin) {
-                        const date = new Date(u.lastSpin);
-                        timeStr = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    }
+        // ============================================
+        // LOGIN SYSTEM
+        // ============================================
+        async function startTelegramLogin() {
+            const loginBtn = document.getElementById('loginButton');
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+            loginBtn.disabled = true;
 
-                    div.innerHTML = `
-                        <div class="feed-user">
-                            <span>${u.name}</span>
-                            <span class="feed-id">(${idStr})</span>
-                        </div>
-                        <div class="feed-right">
-                            <span class="feed-prize" style="color:${u.win ? 'var(--success)' : 'var(--danger)'}">${u.lastReward}</span>
-                            <div class="feed-time">${timeStr}</div>
-                        </div>
-                    `;
-                    feedList.appendChild(div);
+            try {
+                // Initialize Telegram Web App
+                tg.expand();
+                tg.BackButton.hide();
+                
+                // Get user from Telegram
+                const tgUser = tg.initDataUnsafe.user;
+                if (!tgUser) {
+                    throw new Error('Please open from Telegram bot!');
                 }
-            });
-        });
-
-        // ===================================
-        // 3. WHEEL DRAW
-        // ===================================
-        function drawWheel() {
-            const items = appConfig.prizes;
-            const len = items.length;
-            const arc = (2 * Math.PI) / len;
-            const radius = canvas.width / 2;
-            ctx.clearRect(0,0, canvas.width, canvas.height);
-            ctx.translate(radius, radius);
-            for(let i=0; i<len; i++) {
-                const angle = i * arc;
-                ctx.beginPath();
-                ctx.moveTo(0,0);
-                ctx.arc(0, 0, radius, angle, angle + arc);
-                ctx.fillStyle = (items[i].type === 'win') ? (i % 2 === 0 ? '#00f3ff' : '#00a8b0') : (i % 2 === 0 ? '#151a27' : '#222838');
-                ctx.fill();
-                ctx.stroke();
-                ctx.save();
-                ctx.rotate(angle + arc/2);
-                ctx.textAlign = "right";
-                ctx.fillStyle = (items[i].type === 'win') ? "#000" : "#fff";
-                ctx.font = "bold 16px Poppins";
-                let text = items[i].name;
-                if(text.length > 12) text = text.substring(0, 10) + "..";
-                ctx.fillText(text, radius - 25, 6);
-                ctx.restore();
+                
+                // Save login state
+                localStorage.setItem('telegram_bot_login', 'true');
+                
+                // Hide login screen with animation
+                document.getElementById('loginScreen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loginScreen').style.display = 'none';
+                    initializeUser();
+                }, 500);
+                
+            } catch (error) {
+                alert(error.message);
+                loginBtn.innerHTML = '<i class="fab fa-telegram"></i> Login with Telegram';
+                loginBtn.disabled = false;
             }
-            ctx.translate(-radius, -radius);
         }
 
-        // ===================================
-        // 4. SPIN LOGIC & JOIN CHECK
-        // ===================================
-        let currentRotation = 0;
-        btn.addEventListener('click', () => {
-            if(isPoolFull) return;
-
-            // CHECK JOIN STATUS FIRST
-            if(!hasJoined) {
-                document.getElementById('modalJoin').classList.add('active');
+        async function initializeUser() {
+            // Get user from Telegram
+            const tgUser = tg.initDataUnsafe.user;
+            if (!tgUser) {
+                tg.showAlert('Please open from Telegram bot!');
                 return;
             }
-
-            if(!canSpin) return;
             
-            canSpin = false;
-            btn.disabled = true;
-
-            const items = appConfig.prizes;
-            const winChance = appConfig.chance || 20;
-            const isWin = (Math.random() * 100) < winChance;
-
-            let indices = [];
-            items.forEach((item, index) => {
-                if(item.type === (isWin ? 'win' : 'lose')) indices.push(index);
-            });
-
-            if(indices.length === 0) indices = items.map((_, i) => i);
-            const targetIdx = indices[Math.floor(Math.random() * indices.length)];
+            userId = tgUser.id.toString();
+            const userName = tgUser.username || tgUser.first_name || 'User';
+            const userAvatar = tgUser.photo_url || null;
             
-            const sliceDeg = 360 / items.length;
-            const stopAngle = (targetIdx * sliceDeg) + (sliceDeg / 2);
-            const targetRotation = (360 * 6) + (360 - stopAngle);
-
-            let start = null;
-            function animate(time) {
-                if(!start) start = time;
-                const progress = Math.min((time - start) / 4500, 1);
-                const ease = 1 - Math.pow(1 - progress, 4);
-                const rot = currentRotation + (targetRotation * ease);
-                canvas.style.transform = `rotate(${rot}deg)`;
-                if (progress < 1) requestAnimationFrame(animate);
-                else {
-                    currentRotation += targetRotation;
-                    finishSpin(items[targetIdx]);
+            // Update UI
+            document.getElementById('userName').textContent = userName;
+            document.getElementById('userId').textContent = `ID: ${userId.substring(0, 8)}`;
+            document.getElementById('profileName').textContent = userName;
+            document.getElementById('profileId').textContent = `User ID: ${userId}`;
+            
+            if (userAvatar) {
+                document.getElementById('userAvatar').innerHTML = `<img src="${userAvatar}" style="width:100%;height:100%;border-radius:50%;">`;
+                document.getElementById('profileAvatar').style.display = 'none';
+            }
+            
+            // Check/create user in database
+            const userRef = database.ref(`users/${userId}`);
+            const snapshot = await userRef.once('value');
+            
+            if (!snapshot.exists()) {
+                // Create new user with bonus
+                await userRef.set({
+                    username: userName,
+                    balance: 10.00,
+                    joined: Date.now(),
+                    lastActive: Date.now(),
+                    spinsToday: 0,
+                    lastSpin: 0,
+                    banned: false,
+                    totalEarned: 0,
+                    totalWithdrawn: 0,
+                    winCount: 0,
+                    totalSpins: 0,
+                    dailyGoal: 20.00,
+                    level: 1,
+                    experience: 0
+                });
+                
+                // Show welcome bonus
+                setTimeout(() => {
+                    showNotification('🎉 Welcome! You received $10 bonus!', 'success');
+                }, 1000);
+            }
+            
+            // Load user data
+            userRef.on('value', (snapshot) => {
+                userData = snapshot.val();
+                if (userData) {
+                    updateUserDisplay();
+                    checkAchievements();
                 }
-            }
-            requestAnimationFrame(animate);
-        });
-
-        // Verification Function
-        window.verifyJoin = () => {
-            localStorage.setItem('joined_community', 'true');
-            hasJoined = true;
-            document.getElementById('modalJoin').classList.remove('active');
-            alert("Thanks for joining! You can now spin.");
-        };
-
-        function finishSpin(item) {
-            const now = Date.now();
-            const didWin = item.type === 'win';
-            const currentTotal = appConfig.totalSpins || 0;
-            
-            update(ref(db, 'config'), { totalSpins: currentTotal + 1 });
-            update(ref(db, 'users/' + currentUser.id), {
-                id: currentUser.id,
-                lastSpin: now,
-                name: currentUser.first_name,
-                username: currentUser.username || "none",
-                lastReward: item.name,
-                win: didWin
             });
+            
+            // Load game settings
+            loadGameSettings();
+            
+            // Load other data
+            loadAllData();
+            
+            // Show app with animation
+            document.getElementById('appContainer').style.display = 'block';
+            document.getElementById('loadingScreen').style.display = 'none';
+            
+            isLoggedIn = true;
+            
+            // Start timers
+            startTimers();
+        }
 
-            const modal = document.getElementById('modalRes');
-            const h1 = document.getElementById('resEmoji');
-            const h2 = document.getElementById('resTitle');
-            const p = document.getElementById('resDesc');
-
-            if(didWin) {
-                h1.innerText = "🎁";
-                h2.innerText = "CONGRATS!";
-                h2.style.color = "#00f3ff";
-                p.innerText = `You won: ${item.name}`;
-                sendTelegramNotif(item.name, true);
-            } else {
-                h1.innerText = "💔";
-                h2.innerText = "So Close!";
-                h2.style.color = "#ff2a6d";
-                p.innerText = item.name;
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('telegram_bot_login');
+                window.location.reload();
             }
-            modal.classList.add('active');
-            lockSpin(now + (COOLDOWN_HOURS * 3600000));
         }
 
-        function sendTelegramNotif(prizeName, isWin) {
-            if(!appConfig.botToken || !appConfig.adminId) return;
-            const userLink = currentUser.username ? `[@${currentUser.username}]` : `[${currentUser.first_name}](tg://user?id=${currentUser.id})`;
-            const statusEmoji = isWin ? "🟢" : "🔴";
-            const msg = `🎯 *NEW SPIN RESULT* 🎯\n\n👤 *User:* ${userLink}\n🆔 *ID:* \`${currentUser.id}\`\n🎁 *Prize:* ${prizeName}\n📊 *Pool:* ${appConfig.totalSpins + 1}/${appConfig.maxLimit}\n\n${statusEmoji} _Generated by SpinApp_`;
-            fetch(`https://api.telegram.org/bot${appConfig.botToken}/sendMessage?chat_id=${appConfig.adminId}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
+        // ============================================
+        // DATA LOADING
+        // ============================================
+        async function loadAllData() {
+            loadStats();
+            loadTasks();
+            loadNotifications();
+            loadWithdrawHistory();
+            loadAchievements();
+            loadLeaderboard();
+            createWheel();
         }
 
-        // ===================================
-        // 5. COOLDOWN
-        // ===================================
-        function checkUserStatus() {
-            if(isPoolFull || appConfig.maintenance) return;
-            get(ref(db, 'users/' + currentUser.id)).then((snap) => {
-                const data = snap.val();
-                if (data && data.lastSpin) {
-                    const diff = Date.now() - data.lastSpin;
-                    if (diff < COOLDOWN_HOURS * 3600000) {
-                        lockSpin(data.lastSpin + COOLDOWN_HOURS * 3600000);
-                        return;
+        function loadStats() {
+            if (!userId) return;
+            
+            // Online Users
+            database.ref('users').once('value', (snapshot) => {
+                let onlineCount = 0;
+                const now = Date.now();
+                snapshot.forEach((childSnapshot) => {
+                    const user = childSnapshot.val();
+                    if (user.lastActive && (now - user.lastActive) < 300000) {
+                        onlineCount++;
+                    }
+                });
+                document.getElementById('onlineCount').textContent = onlineCount;
+            });
+            
+            // Total Payout
+            database.ref('withdrawals').once('value', (snapshot) => {
+                let totalPayout = 0;
+                snapshot.forEach((childSnapshot) => {
+                    const withdrawal = childSnapshot.val();
+                    if (withdrawal.status === 'approved') {
+                        totalPayout += parseFloat(withdrawal.amount) || 0;
+                    }
+                });
+                // Update total payout display if needed
+            });
+        }
+
+        function loadGameSettings() {
+            database.ref('games/spin/settings').once('value', (snapshot) => {
+                const settings = snapshot.val();
+                if (settings) {
+                    winChance = settings.winPercentage || 30;
+                    document.getElementById('winChance').textContent = `${winChance}%`;
+                }
+            });
+        }
+
+        function updateUserDisplay() {
+            if (!userData) return;
+            
+            document.getElementById('userBalance').textContent = `$${userData.balance.toFixed(2)}`;
+            document.getElementById('spinsToday').textContent = `${userData.spinsToday || 0}/10`;
+            document.getElementById('spinsLeft').textContent = 10 - (userData.spinsToday || 0);
+            document.getElementById('totalEarned').textContent = `$${(userData.totalEarned || 0).toFixed(2)}`;
+            document.getElementById('totalWithdrawn').textContent = `$${(userData.totalWithdrawn || 0).toFixed(2)}`;
+            
+            // Calculate win rate
+            const winRate = userData.totalSpins > 0 ? 
+                Math.round((userData.winCount / userData.totalSpins) * 100) : 0;
+            document.getElementById('winRate').textContent = `${winRate}%`;
+            document.getElementById('profileWinRate').textContent = `${winRate}%`;
+            
+            // Check spin availability
+            checkSpinAvailability();
+        }
+
+        // ============================================
+        // GAME SYSTEM
+        // ============================================
+        function createWheel() {
+            const wheel = document.getElementById('wheel');
+            wheel.innerHTML = '';
+            
+            const rewards = [
+                { value: 0.10, color1: '#ff0000', color2: '#ff5555' },
+                { value: 0.25, color1: '#00ff00', color2: '#55ff55' },
+                { value: 0.50, color1: '#0000ff', color2: '#5555ff' },
+                { value: 1.00, color1: '#ffff00', color2: '#ffff55' },
+                { value: 0.10, color1: '#ff00ff', color2: '#ff55ff' },
+                { value: 0.75, color1: '#00ffff', color2: '#55ffff' },
+                { value: 0.50, color1: '#ff8800', color2: '#ffaa55' },
+                { value: 2.00, color1: '#8800ff', color2: '#aa55ff' }
+            ];
+            
+            rewards.forEach((reward, index) => {
+                const segment = document.createElement('div');
+                segment.className = 'wheel-segment';
+                segment.style.setProperty('--angle', `${index * 45}deg`);
+                segment.style.setProperty('--color1', reward.color1);
+                segment.style.setProperty('--color2', reward.color2);
+                wheel.appendChild(segment);
+                
+                // Add reward text (optional)
+                const text = document.createElement('div');
+                text.style.position = 'absolute';
+                text.style.top = '50%';
+                text.style.left = '50%';
+                text.style.transform = `rotate(${index * 45 + 22.5}deg) translateY(-100px) rotate(-${index * 45 + 22.5}deg)`;
+                text.style.color = 'white';
+                text.style.fontWeight = 'bold';
+                text.style.fontSize = '12px';
+                text.textContent = `$${reward.value}`;
+                wheel.appendChild(text);
+            });
+        }
+
+        function checkSpinAvailability() {
+            if (!userData) return;
+            
+            const now = Date.now();
+            const lastSpin = userData.lastSpin || 0;
+            const spinsToday = userData.spinsToday || 0;
+            
+            // Check daily limit
+            if (spinsToday >= 10) {
+                document.getElementById('spinButton').style.background = '#666';
+                document.getElementById('spinButton').textContent = 'LIMIT REACHED';
+                document.getElementById('spinButton').onclick = null;
+                wheelSpinning = true;
+                document.getElementById('cooldownTimer').textContent = '24h';
+                return;
+            }
+            
+            // Check cooldown
+            const cooldownMs = 60 * 60 * 1000; // 1 hour
+            const timeLeft = cooldownMs - (now - lastSpin);
+            
+            if (timeLeft > 0) {
+                spinCooldown = Math.ceil(timeLeft / 1000);
+                updateSpinTimer();
+                document.getElementById('spinButton').style.background = '#666';
+                document.getElementById('spinButton').textContent = 'WAIT';
+                document.getElementById('spinButton').onclick = null;
+                wheelSpinning = true;
+            } else {
+                spinCooldown = 0;
+                document.getElementById('spinButton').style.background = 'var(--gradient)';
+                document.getElementById('spinButton').textContent = 'SPIN';
+                document.getElementById('spinButton').onclick = spinWheel;
+                wheelSpinning = false;
+                document.getElementById('cooldownTimer').textContent = 'Ready';
+            }
+        }
+
+        function updateSpinTimer() {
+            if (spinCooldown > 0) {
+                const minutes = Math.floor(spinCooldown / 60);
+                const seconds = spinCooldown % 60;
+                document.getElementById('cooldownTimer').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                spinCooldown--;
+                setTimeout(updateSpinTimer, 1000);
+            } else {
+                checkSpinAvailability();
+            }
+        }
+
+        async function spinWheel() {
+            if (wheelSpinning || !userData) return;
+            
+            // Check mandatory tasks
+            const mandatoryCompleted = await checkMandatoryTasks();
+            if (!mandatoryCompleted) {
+                showNotification('⚠️ Complete mandatory tasks first!', 'warning');
+                document.getElementById('tasksSection').style.display = 'block';
+                showSection('tasks');
+                return;
+            }
+            
+            wheelSpinning = true;
+            const spinBtn = document.getElementById('spinButton');
+            spinBtn.style.background = '#666';
+            spinBtn.textContent = 'SPINNING...';
+            
+            // Determine win/loss
+            const isWin = Math.random() * 100 < winChance;
+            let reward = 0;
+            
+            if (isWin) {
+                const rewards = [0.10, 0.25, 0.50, 0.75, 1.00, 1.50, 2.00];
+                reward = rewards[Math.floor(Math.random() * rewards.length)];
+            }
+            
+            // Animate wheel
+            const wheel = document.getElementById('wheel');
+            const spinDegrees = 1440 + Math.random() * 360;
+            wheel.style.transform = `rotate(${spinDegrees}deg)`;
+            
+            // Update user data after animation
+            setTimeout(async () => {
+                const newBalance = userData.balance + reward;
+                const updates = {
+                    balance: newBalance,
+                    spinsToday: (userData.spinsToday || 0) + 1,
+                    lastSpin: Date.now(),
+                    totalSpins: (userData.totalSpins || 0) + 1
+                };
+                
+                if (isWin) {
+                    updates.winCount = (userData.winCount || 0) + 1;
+                    updates.totalEarned = (userData.totalEarned || 0) + reward;
+                }
+                
+                await database.ref(`users/${userId}`).update(updates);
+                
+                // Save result
+                const resultId = Date.now().toString();
+                await database.ref(`games/spin/results/${resultId}`).set({
+                    userId: userId,
+                    win: isWin,
+                    amount: reward,
+                    timestamp: Date.now()
+                });
+                
+                // Show result
+                showSpinResult(isWin, reward);
+                checkSpinAvailability();
+            }, 4000);
+        }
+
+        function showSpinResult(isWin, amount) {
+            const modal = document.getElementById('resultModal');
+            const icon = document.getElementById('resultIcon');
+            const title = document.getElementById('resultTitle');
+            const message = document.getElementById('resultMessage');
+            const resultAmount = document.getElementById('resultAmount');
+            
+            if (isWin) {
+                icon.textContent = '🎉';
+                title.textContent = 'Congratulations!';
+                title.style.color = 'var(--success)';
+                message.textContent = 'You won the spin!';
+                resultAmount.textContent = `+$${amount.toFixed(2)}`;
+                resultAmount.style.color = 'var(--success)';
+                
+                // Check for achievements
+                checkSpinAchievements();
+            } else {
+                icon.textContent = '😢';
+                title.textContent = 'Try Again!';
+                title.style.color = 'var(--danger)';
+                message.textContent = 'Better luck next time!';
+                resultAmount.textContent = 'No Win';
+                resultAmount.style.color = 'var(--danger)';
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeResultModal() {
+            document.getElementById('resultModal').style.display = 'none';
+        }
+
+        function shareResult() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'I won on Game Bot!',
+                    text: `I just won $${userData.balance.toFixed(2)} on Game Bot!`,
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(`I won $${userData.balance.toFixed(2)} on Game Bot!`);
+                showNotification('Result copied to clipboard!', 'success');
+            }
+            closeResultModal();
+        }
+
+        // ============================================
+        // TASK SYSTEM
+        // ============================================
+        async function loadTasks() {
+            database.ref('tasks').once('value', (snapshot) => {
+                tasks = [];
+                const tasksList = document.getElementById('tasksList');
+                tasksList.innerHTML = '';
+                
+                let completedCount = 0;
+                let totalCount = 0;
+                
+                snapshot.forEach((childSnapshot) => {
+                    const task = childSnapshot.val();
+                    task.id = childSnapshot.key;
+                    tasks.push(task);
+                    totalCount++;
+                    
+                    const taskElement = document.createElement('div');
+                    taskElement.className = 'task-card';
+                    taskElement.innerHTML = `
+                        <div class="task-icon">
+                            <i class="fas ${getTaskIcon(task.type)}"></i>
+                        </div>
+                        <div class="task-title">${task.title}</div>
+                        <div class="task-reward">
+                            <i class="fas fa-coins"></i> $${task.reward}
+                        </div>
+                        <button onclick="completeTask('${task.id}')" class="task-btn" id="taskBtn-${task.id}">
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                    `;
+                    tasksList.appendChild(taskElement);
+                    
+                    // Check completion
+                    checkTaskCompletion(task.id);
+                });
+                
+                document.getElementById('tasksCompleted').textContent = `${completedCount}/${totalCount}`;
+            });
+        }
+
+        function getTaskIcon(type) {
+            const icons = {
+                'join_channel': 'fa-users',
+                'watch_ad': 'fa-video',
+                'visit_website': 'fa-globe',
+                'custom': 'fa-star'
+            };
+            return icons[type] || 'fa-tasks';
+        }
+
+        async function checkTaskCompletion(taskId) {
+            if (!userId) return;
+            
+            database.ref(`userTasks/${userId}/${taskId}`).once('value', (snapshot) => {
+                const taskData = snapshot.val();
+                const btn = document.getElementById(`taskBtn-${taskId}`);
+                
+                if (taskData && taskData.completed) {
+                    btn.innerHTML = '<i class="fas fa-check"></i> Completed';
+                    btn.className = 'task-btn completed';
+                    btn.disabled = true;
+                    
+                    // Update completed count
+                    const completedText = document.getElementById('tasksCompleted').textContent;
+                    const [completed, total] = completedText.split('/').map(Number);
+                    document.getElementById('tasksCompleted').textContent = `${completed + 1}/${total}`;
+                }
+            });
+        }
+
+        async function completeTask(taskId) {
+            if (!userId) return;
+            
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            const btn = document.getElementById(`taskBtn-${taskId}`);
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing';
+            btn.disabled = true;
+            
+            // Simulate task completion
+            setTimeout(async () => {
+                await database.ref(`userTasks/${userId}/${taskId}`).set({
+                    completed: true,
+                    completedAt: Date.now(),
+                    reward: task.reward
+                });
+                
+                // Add reward to balance
+                const newBalance = (userData.balance || 0) + task.reward;
+                await database.ref(`users/${userId}/balance`).set(newBalance);
+                
+                // Update total earned
+                await database.ref(`users/${userId}/totalEarned`).transaction(total => {
+                    return (total || 0) + task.reward;
+                });
+                
+                btn.innerHTML = '<i class="fas fa-check"></i> Completed';
+                btn.className = 'task-btn completed';
+                
+                showNotification(`✅ Task completed! +$${task.reward}`, 'success');
+                
+                // Check achievements
+                checkTaskAchievements();
+            }, 2000);
+        }
+
+        async function checkMandatoryTasks() {
+            if (!userId) return;
+            
+            const userTasksSnapshot = await database.ref(`userTasks/${userId}`).once('value');
+            const userTasks = userTasksSnapshot.val() || {};
+            
+            const tasksSnapshot = await database.ref('tasks').once('value');
+            let allMandatoryCompleted = true;
+            
+            tasksSnapshot.forEach((childSnapshot) => {
+                const task = childSnapshot.val();
+                if (task.mandatory) {
+                    if (!userTasks[childSnapshot.key] || !userTasks[childSnapshot.key].completed) {
+                        allMandatoryCompleted = false;
                     }
                 }
-                unlockSpin();
             });
+            
+            return allMandatoryCompleted;
         }
 
-        function lockSpin(targetTime) {
-            canSpin = false;
+        // ============================================
+        // WITHDRAWAL SYSTEM
+        // ============================================
+        async function submitWithdrawal() {
+            if (!userId || !userData) return;
+            
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const method = document.getElementById('withdrawMethod').value;
+            const details = document.getElementById('withdrawDetails').value.trim();
+            
+            // Validation
+            const minAmount = 10;
+            if (!amount || amount < minAmount) {
+                showNotification(`Minimum withdrawal is $${minAmount}!`, 'warning');
+                return;
+            }
+            
+            if (amount > userData.balance) {
+                showNotification('Insufficient balance!', 'danger');
+                return;
+            }
+            
+            if (!method) {
+                showNotification('Select payment method!', 'warning');
+                return;
+            }
+            
+            if (!details) {
+                showNotification('Enter account details!', 'warning');
+                return;
+            }
+            
+            const btn = document.getElementById('withdrawBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing';
             btn.disabled = true;
-            btn.style.background = "#222";
-            btn.innerText = "COOLDOWN ACTIVE";
-            if(window.timerInterval) clearInterval(window.timerInterval);
-            window.timerInterval = setInterval(() => {
-                const now = Date.now();
-                const dist = targetTime - now;
-                if(dist < 0) { clearInterval(window.timerInterval); checkUserStatus(); return; }
-                const h = Math.floor(dist / (1000*60*60));
-                const m = Math.floor((dist % (1000*60*60)) / (1000*60));
-                const s = Math.floor((dist % (1000*60)) / 1000);
-                timerTxt.innerText = `Next Spin: ${h}h ${m}m ${s}s`;
-            }, 1000);
-        }
-
-        function unlockSpin() {
-            if(isPoolFull || appConfig.maintenance) return;
-            canSpin = true;
-            btn.disabled = false;
-            btn.style.background = "linear-gradient(90deg, var(--primary), #00c3cc)";
-            btn.innerText = "SPIN TO WIN";
-            timerTxt.innerText = "";
-            if(window.timerInterval) clearInterval(window.timerInterval);
-        }
-
-        // ===================================
-        // 6. ADMIN FUNCTIONS
-        // ===================================
-        window.openAdminLogin = () => document.getElementById('modalAuth').classList.add('active');
-
-        window.verifyAdmin = () => {
-            const pass = document.getElementById('adminPassInput').value;
-            if(pass === (appConfig.adminPass || "admin123")) {
-                document.getElementById('modalAuth').classList.remove('active');
-                openAdminPanel();
-            } else {
-                alert("Wrong Password");
-            }
-        };
-
-        function openAdminPanel() {
-            document.getElementById('modalAdmin').classList.add('active');
             
-            document.getElementById('cfgToken').value = appConfig.botToken || "";
-            document.getElementById('cfgChatId').value = appConfig.adminId || "";
-            document.getElementById('cfgChance').value = appConfig.chance || 20;
-            document.getElementById('cfgNewPass').value = appConfig.adminPass || "admin123";
-            document.getElementById('cfgMaxLimit').value = appConfig.maxLimit || 50;
-            document.getElementById('admCurSpins').innerText = appConfig.totalSpins || 0;
-            document.getElementById('cfgMaintenance').checked = appConfig.maintenance || false;
-            
-            document.getElementById('cfgChannel').value = appConfig.channelLink || "";
-            document.getElementById('cfgGroup').value = appConfig.groupLink || "";
-
-            tempPrizes = JSON.parse(JSON.stringify(appConfig.prizes));
-            renderAdminPrizes();
+            try {
+                const withdrawalId = Date.now().toString();
+                await database.ref(`withdrawals/${withdrawalId}`).set({
+                    userId: userId,
+                    username: userData.username,
+                    amount: amount,
+                    method: method,
+                    details: details,
+                    status: 'pending',
+                    timestamp: Date.now()
+                });
+                
+                // Deduct from balance
+                const newBalance = userData.balance - amount;
+                await database.ref(`users/${userId}/balance`).set(newBalance);
+                
+                // Update total withdrawn
+                await database.ref(`users/${userId}/totalWithdrawn`).transaction(total => {
+                    return (total || 0) + amount;
+                });
+                
+                // Send notification to admin
+                await database.ref(`notifications/admin/${withdrawalId}`).set({
+                    type: 'withdrawal',
+                    userId: userId,
+                    username: userData.username,
+                    amount: amount,
+                    message: 'New withdrawal request',
+                    timestamp: Date.now(),
+                    read: false
+                });
+                
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Request';
+                btn.disabled = false;
+                
+                document.getElementById('withdrawAmount').value = '';
+                document.getElementById('withdrawDetails').value = '';
+                
+                showNotification('✅ Withdrawal request submitted!', 'success');
+                loadWithdrawHistory();
+                
+            } catch (error) {
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Request';
+                btn.disabled = false;
+                showNotification('Error submitting request!', 'danger');
+            }
         }
 
-        window.addItem = () => {
-            const name = document.getElementById('newPrizeName').value;
-            const type = document.getElementById('newPrizeType').value;
-            if(name) {
-                tempPrizes.push({name, type});
-                document.getElementById('newPrizeName').value = "";
-                renderAdminPrizes();
+        async function loadWithdrawHistory() {
+            if (!userId) return;
+            
+            database.ref('withdrawals').orderByChild('userId').equalTo(userId).once('value', (snapshot) => {
+                const historyTable = document.getElementById('withdrawHistory');
+                historyTable.innerHTML = '';
+                
+                const withdrawals = [];
+                snapshot.forEach((childSnapshot) => {
+                    withdrawals.push(childSnapshot.val());
+                });
+                
+                // Sort by timestamp descending
+                withdrawals.sort((a, b) => b.timestamp - a.timestamp);
+                
+                // Show last 5
+                withdrawals.slice(0, 5).forEach(withdrawal => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${new Date(withdrawal.timestamp).toLocaleDateString()}</td>
+                        <td>$${withdrawal.amount.toFixed(2)}</td>
+                        <td>
+                            <span class="badge" style="
+                                background: ${withdrawal.status === 'approved' ? 'rgba(0,255,136,0.2)' : 
+                                            withdrawal.status === 'rejected' ? 'rgba(255,85,85,0.2)' : 
+                                            'rgba(255,170,0,0.2)'};
+                                color: ${withdrawal.status === 'approved' ? 'var(--success)' : 
+                                       withdrawal.status === 'rejected' ? 'var(--danger)' : 
+                                       'var(--warning)'};
+                                padding: 3px 8px;
+                                border-radius: 10px;
+                                font-size: 12px;
+                            ">
+                                ${withdrawal.status}
+                            </span>
+                        </td>
+                    `;
+                    historyTable.appendChild(row);
+                });
+            });
+        }
+
+        // ============================================
+        // NOTIFICATION SYSTEM
+        // ============================================
+        async function loadNotifications() {
+            if (!userId) return;
+            
+            database.ref(`notifications/${userId}`).orderByChild('timestamp').once('value', (snapshot) => {
+                notifications = [];
+                const notificationsList = document.getElementById('notificationsList');
+                notificationsList.innerHTML = '';
+                
+                let unreadCount = 0;
+                
+                snapshot.forEach((childSnapshot) => {
+                    const notification = childSnapshot.val();
+                    notification.id = childSnapshot.key;
+                    notifications.push(notification);
+                    
+                    if (!notification.read) unreadCount++;
+                    
+                    const notificationElement = document.createElement('div');
+                    notificationElement.className = `notification-item ${notification.read ? '' : 'unread'} ${notification.type === 'reward' ? 'reward' : ''}`;
+                    notificationElement.innerHTML = `
+                        <div class="notification-header">
+                            <div class="notification-title">
+                                ${getNotificationIcon(notification.type)} ${getNotificationTitle(notification.type)}
+                            </div>
+                            <div class="notification-time">
+                                ${formatTime(notification.timestamp)}
+                            </div>
+                        </div>
+                        <div class="notification-message">
+                            ${notification.message}
+                        </div>
+                        ${notification.amount ? `
+                            <div style="color: var(--success); font-weight: 600;">
+                                <i class="fas fa-coins"></i> $${notification.amount}
+                            </div>
+                        ` : ''}
+                        ${notification.type === 'reward' && !notification.claimed ? `
+                            <button onclick="showRewardModal('${notification.id}')" 
+                                    style="margin-top: 10px; padding: 8px 16px; background: var(--success); 
+                                           color: white; border: none; border-radius: 10px; cursor: pointer;">
+                                Claim Reward
+                            </button>
+                        ` : ''}
+                    `;
+                    notificationsList.appendChild(notificationElement);
+                });
+                
+                // Update badges
+                document.getElementById('notificationBadge').textContent = unreadCount;
+                document.getElementById('navNotificationBadge').textContent = unreadCount;
+                document.getElementById('navNotificationBadge').style.display = unreadCount > 0 ? 'block' : 'none';
+            });
+        }
+
+        function getNotificationIcon(type) {
+            const icons = {
+                'broadcast': '📢',
+                'reward': '🎁',
+                'withdrawal': '💳',
+                'achievement': '🏆',
+                'system': '⚙️'
+            };
+            return icons[type] || '📧';
+        }
+
+        function getNotificationTitle(type) {
+            const titles = {
+                'broadcast': 'Announcement',
+                'reward': 'Reward Available',
+                'withdrawal': 'Withdrawal Update',
+                'achievement': 'Achievement Unlocked',
+                'system': 'System Notification'
+            };
+            return titles[type] || 'Notification';
+        }
+
+        function formatTime(timestamp) {
+            const now = Date.now();
+            const diff = now - timestamp;
+            
+            if (diff < 60000) return 'Just now';
+            if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+            if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+            return new Date(timestamp).toLocaleDateString();
+        }
+
+        function showRewardModal(notificationId) {
+            const notification = notifications.find(n => n.id === notificationId);
+            if (!notification) return;
+            
+            document.getElementById('rewardMessage').textContent = notification.message;
+            document.getElementById('rewardAmount').textContent = `$${notification.amount}`;
+            currentRewardId = notificationId;
+            
+            document.getElementById('rewardModal').style.display = 'flex';
+        }
+
+        async function claimReward() {
+            if (!currentRewardId || !userId) return;
+            
+            const notification = notifications.find(n => n.id === currentRewardId);
+            if (!notification) return;
+            
+            // Get reward from rewards collection
+            const rewardSnapshot = await database.ref(`rewards/${currentRewardId}`).once('value');
+            const reward = rewardSnapshot.val();
+            
+            if (!reward || reward.claimed) {
+                showNotification('Reward already claimed!', 'warning');
+                return;
             }
-        };
+            
+            // Mark as claimed
+            await database.ref(`rewards/${currentRewardId}/claimed`).set(true);
+            await database.ref(`notifications/${userId}/${currentRewardId}/claimed`).set(true);
+            await database.ref(`notifications/${userId}/${currentRewardId}/read`).set(true);
+            
+            // Add to balance
+            const newBalance = (userData.balance || 0) + reward.amount;
+            await database.ref(`users/${userId}`).update({
+                balance: newBalance,
+                totalEarned: (userData.totalEarned || 0) + reward.amount
+            });
+            
+            showNotification(`🎉 Reward claimed! +$${reward.amount}`, 'success');
+            closeRewardModal();
+            loadNotifications();
+        }
 
-        window.deleteItem = (index) => {
-            tempPrizes.splice(index, 1);
-            renderAdminPrizes();
-        };
+        function closeRewardModal() {
+            document.getElementById('rewardModal').style.display = 'none';
+            currentRewardId = null;
+        }
 
-        window.resetPoolCount = () => {
-            if(confirm("Reset total spins to 0?")) {
-                update(ref(db, 'config'), { totalSpins: 0 });
-                document.getElementById('admCurSpins').innerText = "0";
-                appConfig.totalSpins = 0;
+        async function markAllAsRead() {
+            if (!userId) return;
+            
+            const updates = {};
+            notifications.forEach(notification => {
+                if (!notification.read) {
+                    updates[`notifications/${userId}/${notification.id}/read`] = true;
+                }
+            });
+            
+            if (Object.keys(updates).length > 0) {
+                await database.ref().update(updates);
+                document.getElementById('navNotificationBadge').style.display = 'none';
+                document.getElementById('notificationBadge').textContent = '0';
+                loadNotifications();
             }
-        };
+        }
 
-        function renderAdminPrizes() {
-            const container = document.getElementById('prizeListContainer');
-            container.innerHTML = "";
-            tempPrizes.forEach((p, i) => {
-                container.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid #333; font-size:12px;">
-                        <span>${p.name}</span>
-                        <span style="color:${p.type==='win'?'var(--primary)':'var(--danger)'}">${p.type}</span>
-                        <i class="fas fa-trash" style="color:#ff4444; cursor:pointer;" onclick="window.deleteItem(${i})"></i>
+        // ============================================
+        // ACHIEVEMENT SYSTEM
+        // ============================================
+        async function loadAchievements() {
+            // Predefined achievements
+            achievements = [
+                { id: 'first_spin', title: 'First Spin', reward: 1.00, icon: 'fa-play', 
+                  condition: (user) => user.totalSpins >= 1 },
+                { id: 'five_spins', title: 'Spin Master', reward: 5.00, icon: 'fa-gamepad', 
+                  condition: (user) => user.totalSpins >= 5 },
+                { id: 'first_win', title: 'First Win', reward: 2.00, icon: 'fa-trophy', 
+                  condition: (user) => user.winCount >= 1 },
+                { id: 'five_wins', title: 'Lucky Player', reward: 10.00, icon: 'fa-star', 
+                  condition: (user) => user.winCount >= 5 },
+                { id: 'first_task', title: 'Task Starter', reward: 1.00, icon: 'fa-tasks', 
+                  condition: (user) => user.totalTasks >= 1 },
+                { id: 'balance_50', title: 'Rich Player', reward: 5.00, icon: 'fa-money-bill-wave', 
+                  condition: (user) => user.balance >= 50 },
+                { id: 'daily_goal', title: 'Goal Achiever', reward: 3.00, icon: 'fa-bullseye', 
+                  condition: (user) => user.totalEarned >= (user.dailyGoal || 20) }
+            ];
+            
+            // Check achievements for current user
+            checkAchievements();
+        }
+
+        async function checkAchievements() {
+            if (!userId || !userData) return;
+            
+            // Get user's unlocked achievements
+            const userAchievementsSnapshot = await database.ref(`userAchievements/${userId}`).once('value');
+            const userAchievements = userAchievementsSnapshot.val() || {};
+            
+            // Check each achievement
+            achievements.forEach(async (achievement) => {
+                if (!userAchievements[achievement.id] && achievement.condition(userData)) {
+                    // Unlock achievement
+                    await unlockAchievement(achievement);
+                }
+            });
+        }
+
+        async function checkSpinAchievements() {
+            if (!userData) return;
+            
+            // Check for spin-related achievements
+            if (userData.totalSpins === 1) {
+                const achievement = achievements.find(a => a.id === 'first_spin');
+                if (achievement) await unlockAchievement(achievement);
+            }
+            
+            if (userData.totalSpins === 5) {
+                const achievement = achievements.find(a => a.id === 'five_spins');
+                if (achievement) await unlockAchievement(achievement);
+            }
+            
+            if (userData.winCount === 1) {
+                const achievement = achievements.find(a => a.id === 'first_win');
+                if (achievement) await unlockAchievement(achievement);
+            }
+            
+            if (userData.winCount === 5) {
+                const achievement = achievements.find(a => a.id === 'five_wins');
+                if (achievement) await unlockAchievement(achievement);
+            }
+        }
+
+        async function checkTaskAchievements() {
+            // Count completed tasks
+            const userTasksSnapshot = await database.ref(`userTasks/${userId}`).once('value');
+            const completedTasks = userTasksSnapshot.numChildren();
+            
+            if (completedTasks === 1) {
+                const achievement = achievements.find(a => a.id === 'first_task');
+                if (achievement) await unlockAchievement(achievement);
+            }
+        }
+
+        async function unlockAchievement(achievement) {
+            if (!userId) return;
+            
+            // Mark as unlocked
+            await database.ref(`userAchievements/${userId}/${achievement.id}`).set({
+                unlockedAt: Date.now(),
+                reward: achievement.reward
+            });
+            
+            // Add reward to balance
+            const newBalance = (userData.balance || 0) + achievement.reward;
+            await database.ref(`users/${userId}`).update({
+                balance: newBalance,
+                totalEarned: (userData.totalEarned || 0) + achievement.reward
+            });
+            
+            // Show achievement modal
+            showAchievementModal(achievement);
+            
+            // Send notification
+            await database.ref(`notifications/${userId}/${Date.now()}`).set({
+                type: 'achievement',
+                message: `Achievement unlocked: ${achievement.title}`,
+                amount: achievement.reward,
+                timestamp: Date.now(),
+                read: false
+            });
+        }
+
+        function showAchievementModal(achievement) {
+            document.getElementById('achievementMessage').textContent = 
+                `You unlocked the "${achievement.title}" achievement!`;
+            document.getElementById('achievementReward').textContent = `+$${achievement.reward}`;
+            document.getElementById('achievementModal').style.display = 'flex';
+        }
+
+        function closeAchievementModal() {
+            document.getElementById('achievementModal').style.display = 'none';
+        }
+
+        // ============================================
+        // LEADERBOARD
+        // ============================================
+        async function loadLeaderboard() {
+            database.ref('users').once('value', (snapshot) => {
+                const leaderboard = [];
+                snapshot.forEach((childSnapshot) => {
+                    const user = childSnapshot.val();
+                    if (user.balance > 0) {
+                        leaderboard.push({
+                            id: childSnapshot.key,
+                            username: user.username,
+                            balance: user.balance
+                        });
+                    }
+                });
+                
+                // Sort by balance descending
+                leaderboard.sort((a, b) => b.balance - a.balance);
+                
+                // Display top 10
+                // (You can add a leaderboard section in HTML to show this)
+            });
+        }
+
+        // ============================================
+        // UI FUNCTIONS
+        // ============================================
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show selected section
+            document.getElementById(`${sectionId}Section`).style.display = 'block';
+            
+            // Update active nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href') === `#${sectionId}`) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Mark notifications as read when viewing
+            if (sectionId === 'notifications') {
+                markAllAsRead();
+            }
+        }
+
+        function showProfileModal() {
+            document.getElementById('profileModal').style.display = 'flex';
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').style.display = 'none';
+        }
+
+        async function saveSettings() {
+            const spinLimit = document.getElementById('userSpinLimit').value;
+            const soundEnabled = document.getElementById('soundEnabled').checked;
+            const notificationsEnabled = document.getElementById('notificationsEnabled').checked;
+            const theme = document.getElementById('themeSelect').value;
+            
+            // Save to localStorage
+            localStorage.setItem('userSettings', JSON.stringify({
+                spinLimit,
+                soundEnabled,
+                notificationsEnabled,
+                theme
+            }));
+            
+            showNotification('Settings saved!', 'success');
+            closeProfileModal();
+        }
+
+        async function saveProfileSettings() {
+            const dailyGoal = parseFloat(document.getElementById('dailyGoal').value);
+            
+            if (dailyGoal && dailyGoal > 0) {
+                await database.ref(`users/${userId}/dailyGoal`).set(dailyGoal);
+                showNotification('Daily goal saved!', 'success');
+            }
+        }
+
+        function showAllTasks() {
+            // You can implement a modal or page showing all tasks
+            showNotification('Showing all available tasks!', 'info');
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = 'notification-item';
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '3000';
+            notification.style.animation = 'slideIn 0.3s ease';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 40px; height: 40px; background: ${
+                        type === 'success' ? 'var(--success)' : 
+                        type === 'danger' ? 'var(--danger)' : 
+                        type === 'warning' ? 'var(--warning)' : 'var(--primary)'
+                    }; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-${
+                            type === 'success' ? 'check' : 
+                            type === 'danger' ? 'times' : 
+                            type === 'warning' ? 'exclamation' : 'info'
+                        }"></i>
                     </div>
-                `;
-            });
-        }
-
-        window.saveSettings = () => {
-            if(tempPrizes.length < 2) return alert("Min 2 items!");
+                    <div>${message}</div>
+                </div>
+            `;
             
-            update(ref(db, 'config'), {
-                botToken: document.getElementById('cfgToken').value,
-                adminId: document.getElementById('cfgChatId').value,
-                chance: parseInt(document.getElementById('cfgChance').value),
-                adminPass: document.getElementById('cfgNewPass').value,
-                maxLimit: parseInt(document.getElementById('cfgMaxLimit').value),
-                maintenance: document.getElementById('cfgMaintenance').checked,
-                channelLink: document.getElementById('cfgChannel').value,
-                groupLink: document.getElementById('cfgGroup').value,
-                prizes: tempPrizes
-            }).then(() => {
-                alert("Settings Saved!");
-                document.getElementById('modalAdmin').classList.remove('active');
-            });
-        };
-
-        window.createDefaultConfig = () => {
-            set(ref(db, 'config'), {
-                adminPass: "admin123",
-                chance: 20,
-                maxLimit: 100,
-                totalSpins: 0,
-                maintenance: false,
-                channelLink: "https://t.me/",
-                groupLink: "https://t.me/",
-                prizes: [{name: "0.10 $", type: "win"}, {name: "Try Again", type: "lose"}]
-            });
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
         }
+
+        // ============================================
+        // TIMERS & UPDATES
+        // ============================================
+        function startTimers() {
+            // Update user online status every minute
+            setInterval(updateOnlineStatus, 60000);
+            
+            // Update stats every 30 seconds
+            setInterval(() => {
+                if (isLoggedIn) {
+                    loadStats();
+                    updateUserDisplay();
+                }
+            }, 30000);
+            
+            // Check for new notifications every minute
+            setInterval(() => {
+                if (isLoggedIn) {
+                    loadNotifications();
+                }
+            }, 60000);
+        }
+
+        async function updateOnlineStatus() {
+            if (userId) {
+                await database.ref(`users/${userId}/lastActive`).set(Date.now());
+            }
+        }
+
+        // ============================================
+        // TELEGRAM WEB APP INTEGRATION
+        // ============================================
+        tg.ready();
+        tg.expand();
+        tg.enableClosingConfirmation();
+
+        // Set theme colors
+        tg.setHeaderColor('#0a0a14');
+        tg.setBackgroundColor('#050510');
+
+        // Handle back button
+        tg.BackButton.onClick(() => {
+            if (document.getElementById('resultModal').style.display === 'flex') {
+                closeResultModal();
+            } else if (document.getElementById('rewardModal').style.display === 'flex') {
+                closeRewardModal();
+            } else {
+                tg.close();
+            }
+        });
+
+        // ============================================
+        // ADDITIONAL FEATURES
+        // ============================================
+        
+        // Daily Bonus System
+        async function checkDailyBonus() {
+            if (!userId) return;
+            
+            const today = new Date().toDateString();
+            const lastBonus = localStorage.getItem(`daily_bonus_${userId}`);
+            
+            if (lastBonus !== today) {
+                // Give daily bonus
+                const bonus = 1.00; // $1 daily bonus
+                const newBalance = (userData.balance || 0) + bonus;
+                await database.ref(`users/${userId}`).update({
+                    balance: newBalance,
+                    totalEarned: (userData.totalEarned || 0) + bonus
+                });
+                
+                localStorage.setItem(`daily_bonus_${userId}`, today);
+                showNotification(`🎁 Daily bonus: +$${bonus}`, 'success');
+            }
+        }
+
+        // Referral System
+        async function checkReferral() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const referralCode = urlParams.get('ref');
+            
+            if (referralCode && !localStorage.getItem('referral_used')) {
+                // Add referral bonus
+                const bonus = 5.00;
+                const newBalance = (userData.balance || 0) + bonus;
+                await database.ref(`users/${userId}`).update({
+                    balance: newBalance,
+                    totalEarned: (userData.totalEarned || 0) + bonus
+                });
+                
+                localStorage.setItem('referral_used', 'true');
+                showNotification(`👥 Referral bonus: +$${bonus}`, 'success');
+            }
+        }
+
+        // Level System
+        async function updateLevel() {
+            if (!userData) return;
+            
+            const expNeeded = userData.level * 100;
+            if (userData.experience >= expNeeded) {
+                const newLevel = userData.level + 1;
+                const levelBonus = newLevel * 5;
+                
+                await database.ref(`users/${userId}`).update({
+                    level: newLevel,
+                    experience: userData.experience - expNeeded,
+                    balance: (userData.balance || 0) + levelBonus,
+                    totalEarned: (userData.totalEarned || 0) + levelBonus
+                });
+                
+                showNotification(`🌟 Level Up! You reached level ${newLevel} and got $${levelBonus} bonus!`, 'success');
+            }
+        }
+
+        // Auto-run functions when user logs in
+        setTimeout(() => {
+            if (isLoggedIn) {
+                checkDailyBonus();
+                checkReferral();
+            }
+        }, 3000);
     </script>
 </body>
 </html>
