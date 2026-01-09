@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Game Bot</title>
+    <title>Game Bot - Earn Money</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -69,6 +69,11 @@
             margin-bottom: 20px;
         }
 
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .loading-text {
             font-family: 'Poppins', sans-serif;
             font-size: 20px;
@@ -76,11 +81,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-top: 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
 
         /* Login Screen */
@@ -118,7 +118,7 @@
         }
 
         .login-container {
-            background: rgba(21, 21, 34, 0.9);
+            background: rgba(21, 21, 34, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 25px;
             padding: 40px;
@@ -132,14 +132,8 @@
         }
 
         @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .logo-large {
@@ -194,10 +188,6 @@
             box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
         }
 
-        .login-btn:active {
-            transform: translateY(0);
-        }
-
         .login-features {
             margin-top: 30px;
             display: grid;
@@ -222,6 +212,80 @@
         .feature span {
             font-size: 12px;
             color: var(--text-secondary);
+        }
+
+        /* Maintenance Screen */
+        .maintenance-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--darker);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9998;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .maintenance-icon {
+            font-size: 80px;
+            color: var(--warning);
+            margin-bottom: 20px;
+        }
+
+        .maintenance-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 32px;
+            color: var(--warning);
+            margin-bottom: 15px;
+        }
+
+        .maintenance-message {
+            color: var(--text-secondary);
+            font-size: 16px;
+            max-width: 400px;
+            line-height: 1.5;
+        }
+
+        /* Banned Screen */
+        .banned-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--darker);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9998;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .banned-icon {
+            font-size: 80px;
+            color: var(--danger);
+            margin-bottom: 20px;
+        }
+
+        .banned-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 32px;
+            color: var(--danger);
+            margin-bottom: 15px;
+        }
+
+        .banned-message {
+            color: var(--text-secondary);
+            font-size: 16px;
+            max-width: 400px;
+            line-height: 1.5;
         }
 
         /* Main App */
@@ -361,7 +425,7 @@
             color: var(--text-secondary);
         }
 
-        /* Main Content */
+        /* Content Sections */
         .content-section {
             background: var(--card-bg);
             border-radius: 20px;
@@ -370,17 +434,16 @@
             border: 1px solid var(--border);
             box-shadow: 0 10px 30px var(--shadow);
             animation: slideIn 0.5s ease;
+            display: none;
         }
 
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-section.active {
+            display: block;
         }
 
         .section-title {
@@ -396,8 +459,8 @@
         /* Game Wheel */
         .wheel-container {
             position: relative;
-            width: 300px;
-            height: 300px;
+            width: 280px;
+            height: 280px;
             margin: 0 auto 30px;
             perspective: 1000px;
         }
@@ -447,13 +510,15 @@
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
         }
 
-        .wheel-center:hover {
+        .wheel-center:hover:not(:disabled) {
             transform: translate(-50%, -50%) scale(1.1);
             box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
         }
 
-        .wheel-center:active {
-            transform: translate(-50%, -50%) scale(0.95);
+        .wheel-center:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: translate(-50%, -50%) scale(1);
         }
 
         .spin-info {
@@ -550,14 +615,15 @@
             gap: 8px;
         }
 
-        .task-btn:hover {
+        .task-btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 217, 255, 0.3);
         }
 
-        .task-btn.completed {
+        .task-btn:disabled {
             background: var(--success);
             cursor: not-allowed;
+            opacity: 0.7;
         }
 
         /* Withdraw Form */
@@ -627,7 +693,7 @@
         }
 
         .btn {
-            padding: 18px 30px;
+            padding: 18px;
             border: none;
             border-radius: 15px;
             font-family: 'Poppins', sans-serif;
@@ -639,8 +705,6 @@
             align-items: center;
             gap: 10px;
             font-size: 16px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .btn-primary {
@@ -648,9 +712,14 @@
             color: white;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .btn-secondary {
@@ -724,32 +793,6 @@
             margin-bottom: 10px;
         }
 
-        /* History */
-        .history-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        .history-table th {
-            text-align: left;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--primary);
-            font-weight: 600;
-            font-family: 'Poppins', sans-serif;
-            border-bottom: 2px solid var(--border);
-        }
-
-        .history-table td {
-            padding: 15px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .history-table tr:hover {
-            background: rgba(255, 255, 255, 0.03);
-        }
-
         /* Navigation */
         .bottom-nav {
             position: fixed;
@@ -780,6 +823,7 @@
             align-items: center;
             gap: 5px;
             position: relative;
+            cursor: pointer;
         }
 
         .nav-item.active {
@@ -828,6 +872,10 @@
             animation: fadeIn 0.3s ease;
         }
 
+        .modal.active {
+            display: flex;
+        }
+
         .modal-content {
             background: var(--card-bg);
             border-radius: 25px;
@@ -841,14 +889,8 @@
         }
 
         @keyframes scaleIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .modal-icon {
@@ -880,126 +922,38 @@
             flex: 1;
         }
 
-        /* Achievements */
-        .achievements-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .achievement-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .achievement-card.locked {
-            opacity: 0.5;
-            filter: grayscale(1);
-        }
-
-        .achievement-card.unlocked {
-            border-color: var(--success);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
-        }
-
-        .achievement-icon {
-            width: 50px;
-            height: 50px;
-            background: var(--gradient);
-            border-radius: 50%;
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 3000;
+            max-width: 350px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin: 0 auto 10px;
-            font-size: 20px;
-            color: white;
-        }
-
-        .achievement-title {
-            font-family: 'Poppins', sans-serif;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-
-        .achievement-reward {
-            font-size: 12px;
-            color: var(--success);
-            font-weight: 600;
-        }
-
-        /* Leaderboard */
-        .leaderboard-list {
-            display: flex;
-            flex-direction: column;
             gap: 10px;
-            margin-top: 20px;
         }
 
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            border: 1px solid var(--border);
+        .toast.show {
+            transform: translateX(0);
         }
 
-        .rank {
-            width: 40px;
-            height: 40px;
-            background: var(--gradient);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-family: 'Poppins', sans-serif;
-            color: white;
+        .toast-icon {
+            font-size: 20px;
         }
 
-        .rank-1 { background: gold; }
-        .rank-2 { background: silver; }
-        .rank-3 { background: #cd7f32; }
+        .toast.success { border-left-color: var(--success); }
+        .toast.warning { border-left-color: var(--warning); }
+        .toast.danger { border-left-color: var(--danger); }
+        .toast.info { border-left-color: var(--primary); }
 
-        .player-info {
-            flex: 1;
-        }
-
-        .player-name {
-            font-family: 'Poppins', sans-serif;
-            font-size: 16px;
-        }
-
-        .player-balance {
-            font-size: 14px;
-            color: var(--success);
-            font-weight: 600;
-        }
-
-        /* Animations */
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-
-        .shake {
-            animation: shake 0.5s ease;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
-        }
-
-        /* Responsive */
         @media (max-width: 480px) {
             .wheel-container {
                 width: 250px;
@@ -1020,10 +974,6 @@
                 font-size: 28px;
             }
             
-            .quick-stats {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
             .tasks-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -1035,6 +985,27 @@
     <div id="loadingScreen" class="loading-screen">
         <div class="loader"></div>
         <div class="loading-text">Loading Game Bot...</div>
+    </div>
+
+    <!-- Maintenance Screen -->
+    <div id="maintenanceScreen" class="maintenance-screen">
+        <div class="maintenance-icon">🛠️</div>
+        <h2 class="maintenance-title">Under Maintenance</h2>
+        <p class="maintenance-message" id="maintenanceMessage">
+            The system is currently under maintenance. Please check back later.
+        </p>
+        <button onclick="checkMaintenance()" class="btn btn-primary" style="margin-top: 20px;">
+            <i class="fas fa-sync"></i> Check Again
+        </button>
+    </div>
+
+    <!-- Banned Screen -->
+    <div id="bannedScreen" class="banned-screen">
+        <div class="banned-icon">🚫</div>
+        <h2 class="banned-title">Account Banned</h2>
+        <p class="banned-message" id="bannedMessage">
+            Your account has been suspended. Please contact support for assistance.
+        </p>
     </div>
 
     <!-- Login Screen -->
@@ -1088,9 +1059,9 @@
                     <div class="user-name" id="userName">Loading...</div>
                     <div class="user-id" id="userId">ID: 000000</div>
                 </div>
-                <button onclick="showProfileModal()" class="btn btn-secondary" style="padding: 10px 15px;">
-                    <i class="fas fa-cog"></i>
-                </button>
+                <div onclick="showProfileModal()" style="cursor: pointer;">
+                    <i class="fas fa-cog" style="font-size: 24px; color: var(--primary);"></i>
+                </div>
             </div>
             
             <div class="wallet-card">
@@ -1106,26 +1077,24 @@
                 <div class="stat-value" id="spinsToday">0/10</div>
             </div>
             <div class="stat-item">
-                <div class="stat-label">Online</div>
-                <div class="stat-value" id="onlineCount">0</div>
-            </div>
-            <div class="stat-item">
                 <div class="stat-label">Win Rate</div>
                 <div class="stat-value" id="winRate">0%</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Tasks Done</div>
+                <div class="stat-value" id="tasksDone">0</div>
             </div>
         </div>
 
         <!-- Game Section -->
-        <section id="gameSection" class="content-section">
+        <section id="gameSection" class="content-section active">
             <h2 class="section-title">
                 <i class="fas fa-gamepad"></i> Spin Wheel
             </h2>
             
             <div class="wheel-container">
-                <div class="wheel" id="wheel">
-                    <!-- Wheel segments will be generated by JavaScript -->
-                </div>
-                <div class="wheel-center" onclick="spinWheel()" id="spinButton">
+                <div class="wheel" id="wheel"></div>
+                <div class="wheel-center" id="spinButton" onclick="spinWheel()">
                     SPIN
                 </div>
             </div>
@@ -1145,13 +1114,15 @@
                 </div>
             </div>
             
-            <p style="text-align: center; color: var(--text-secondary); margin-top: 20px; font-size: 14px;">
-                <i class="fas fa-info-circle"></i> Complete tasks to unlock more spins!
-            </p>
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="showSection('tasks')" class="btn btn-secondary">
+                    <i class="fas fa-tasks"></i> Complete Tasks for More Spins
+                </button>
+            </div>
         </section>
 
         <!-- Tasks Section -->
-        <section id="tasksSection" class="content-section" style="display: none;">
+        <section id="tasksSection" class="content-section">
             <h2 class="section-title">
                 <i class="fas fa-tasks"></i> Earn More
                 <span style="margin-left: auto; font-size: 14px; color: var(--success);" id="tasksCompleted">0/0 Completed</span>
@@ -1162,14 +1133,14 @@
             </div>
             
             <div style="text-align: center; margin-top: 20px;">
-                <button onclick="showAllTasks()" class="btn btn-secondary">
-                    <i class="fas fa-list"></i> View All Tasks
+                <button onclick="showSection('game')" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Spin
                 </button>
             </div>
         </section>
 
         <!-- Withdraw Section -->
-        <section id="withdrawSection" class="content-section" style="display: none;">
+        <section id="withdrawSection" class="content-section">
             <h2 class="section-title">
                 <i class="fas fa-wallet"></i> Withdraw Earnings
             </h2>
@@ -1195,9 +1166,8 @@
                             <option value="">Select method</option>
                             <option value="PayPal">PayPal</option>
                             <option value="Bkash">Bkash</option>
-                            <option value="Payoneer">Payoneer</option>
+                            <option value="Nagad">Nagad</option>
                             <option value="Bank">Bank Transfer</option>
-                            <option value="Crypto">Crypto</option>
                         </select>
                     </div>
                 </div>
@@ -1207,7 +1177,7 @@
                     <div class="input-wrapper">
                         <i class="fas fa-user input-icon"></i>
                         <input type="text" id="withdrawDetails" class="form-input" 
-                               placeholder="Your account ID/email/address">
+                               placeholder="Your account ID/email/phone">
                     </div>
                 </div>
                 
@@ -1219,24 +1189,15 @@
             <h3 class="section-title" style="margin-top: 30px; font-size: 16px;">
                 <i class="fas fa-history"></i> Recent Withdrawals
             </h3>
-            <div class="table-container">
-                <table class="history-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="withdrawHistory">
-                        <!-- History will be loaded here -->
-                    </tbody>
-                </table>
+            <div style="background: rgba(255,255,255,0.05); border-radius: 15px; padding: 15px;">
+                <div id="withdrawHistory">
+                    <!-- History will be loaded here -->
+                </div>
             </div>
         </section>
 
         <!-- Notifications Section -->
-        <section id="notificationsSection" class="content-section" style="display: none;">
+        <section id="notificationsSection" class="content-section">
             <h2 class="section-title">
                 <i class="fas fa-bell"></i> Notifications
                 <span class="nav-badge" id="notificationBadge" style="position: static; margin-left: 10px;">0</span>
@@ -1254,7 +1215,7 @@
         </section>
 
         <!-- Profile Section -->
-        <section id="profileSection" class="content-section" style="display: none;">
+        <section id="profileSection" class="content-section">
             <h2 class="section-title">
                 <i class="fas fa-user-circle"></i> My Profile
             </h2>
@@ -1277,52 +1238,39 @@
                     <div class="stat-value" id="totalWithdrawn">$0</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">Win Rate</div>
-                    <div class="stat-value" id="profileWinRate">0%</div>
+                    <div class="stat-label">Level</div>
+                    <div class="stat-value" id="userLevel">1</div>
                 </div>
             </div>
             
-            <div class="form-group">
-                <label class="form-label">Daily Goal</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-bullseye input-icon"></i>
-                    <input type="number" id="dailyGoal" class="form-input" 
-                           placeholder="Set your daily earning goal" min="0" step="0.01">
-                </div>
-            </div>
-            
-            <button onclick="saveProfileSettings()" class="btn btn-primary" style="margin-top: 20px;">
-                <i class="fas fa-save"></i> Save Settings
-            </button>
-            
-            <button onclick="logout()" class="btn btn-danger" style="margin-top: 15px; width: 100%;">
+            <button onclick="logout()" class="btn btn-danger" style="width: 100%; margin-top: 20px;">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </button>
         </section>
 
         <!-- Navigation -->
         <nav class="bottom-nav">
-            <a href="#game" class="nav-item active" onclick="showSection('game')">
+            <div class="nav-item active" onclick="showSection('game')">
                 <i class="fas fa-gamepad"></i>
                 <span>Spin</span>
-            </a>
-            <a href="#tasks" class="nav-item" onclick="showSection('tasks')">
+            </div>
+            <div class="nav-item" onclick="showSection('tasks')">
                 <i class="fas fa-tasks"></i>
                 <span>Earn</span>
-            </a>
-            <a href="#withdraw" class="nav-item" onclick="showSection('withdraw')">
+            </div>
+            <div class="nav-item" onclick="showSection('withdraw')">
                 <i class="fas fa-wallet"></i>
                 <span>Cashout</span>
-            </a>
-            <a href="#notifications" class="nav-item" onclick="showSection('notifications')">
+            </div>
+            <div class="nav-item" onclick="showSection('notifications')">
                 <i class="fas fa-bell"></i>
                 <span>Alerts</span>
                 <span class="nav-badge" id="navNotificationBadge">0</span>
-            </a>
-            <a href="#profile" class="nav-item" onclick="showSection('profile')">
+            </div>
+            <div class="nav-item" onclick="showSection('profile')">
                 <i class="fas fa-user"></i>
                 <span>Me</span>
-            </a>
+            </div>
         </nav>
     </div>
 
@@ -1372,38 +1320,21 @@
             <h2 class="modal-title">Settings</h2>
             
             <div class="form-group" style="margin-top: 20px;">
-                <label class="form-label">Daily Spin Limit</label>
+                <label class="form-label">Daily Goal ($)</label>
                 <div class="input-wrapper">
-                    <i class="fas fa-sync input-icon"></i>
-                    <input type="number" id="userSpinLimit" class="form-input" value="10" min="1" max="50">
+                    <i class="fas fa-bullseye input-icon"></i>
+                    <input type="number" id="dailyGoal" class="form-input" value="20" min="1" step="0.01">
                 </div>
             </div>
             
             <div class="form-group">
-                <label class="form-label">
-                    <input type="checkbox" id="soundEnabled" checked>
-                    Enable Sounds
+                <label class="form-label" style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 50px; height: 24px; background: #ccc; border-radius: 12px; position: relative;">
+                        <input type="checkbox" id="soundEnabled" checked style="display: none;">
+                        <div id="soundToggle" style="position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: transform 0.3s;"></div>
+                    </div>
+                    <span>Enable Sounds</span>
                 </label>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <input type="checkbox" id="notificationsEnabled" checked>
-                    Push Notifications
-                </label>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Theme</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-palette input-icon"></i>
-                    <select id="themeSelect" class="form-select">
-                        <option value="dark">Dark Neon</option>
-                        <option value="blue">Blue Ocean</option>
-                        <option value="purple">Purple Dream</option>
-                        <option value="green">Green Matrix</option>
-                    </select>
-                </div>
             </div>
             
             <div class="modal-actions">
@@ -1417,24 +1348,12 @@
         </div>
     </div>
 
-    <!-- Achievement Modal -->
-    <div id="achievementModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-icon">🏆</div>
-            <h2 class="modal-title">Achievement Unlocked!</h2>
-            <div class="modal-message" id="achievementMessage"></div>
-            <div style="font-size: 32px; font-weight: 700; color: var(--success); margin: 20px 0;" id="achievementReward">
-                +$0.00
-            </div>
-            <button onclick="closeAchievementModal()" class="btn btn-primary">
-                Awesome!
-            </button>
-        </div>
-    </div>
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
 
     <script>
         // ============================================
-        // INITIALIZATION
+        // CONFIGURATION
         // ============================================
         const tg = window.Telegram.WebApp;
         const firebaseConfig = {
@@ -1452,31 +1371,43 @@
 
         let userId = null;
         let userData = null;
-        let userStats = null;
-        let wheelSpinning = false;
         let tasks = [];
         let notifications = [];
-        let achievements = [];
         let spinCooldown = 0;
         let winChance = 30;
         let isLoggedIn = false;
+        let currentRewardId = null;
+        let isSpinning = false;
+        let maintenanceMode = false;
 
-        // Initialize on page load
+        // ============================================
+        // INITIALIZATION
+        // ============================================
         document.addEventListener('DOMContentLoaded', async () => {
-            // Check if already logged in
-            const savedLogin = localStorage.getItem('telegram_bot_login');
-            if (savedLogin === 'true') {
-                await initializeUser();
-            } else {
-                // Show login screen after loading
+            // Hide loading screen after 1.5 seconds
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.opacity = '0';
                 setTimeout(() => {
-                    document.getElementById('loadingScreen').style.opacity = '0';
-                    setTimeout(() => {
-                        document.getElementById('loadingScreen').style.display = 'none';
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    
+                    // Check if already logged in
+                    const savedLogin = localStorage.getItem('telegram_bot_user_id');
+                    if (savedLogin) {
+                        checkMaintenance();
+                    } else {
                         document.getElementById('loginScreen').style.display = 'flex';
-                    }, 500);
-                }, 1500);
-            }
+                    }
+                }, 500);
+            }, 1500);
+
+            // Setup sound toggle
+            document.getElementById('soundToggle').parentElement.addEventListener('click', function() {
+                const checkbox = document.getElementById('soundEnabled');
+                checkbox.checked = !checkbox.checked;
+                const toggle = document.getElementById('soundToggle');
+                toggle.style.transform = checkbox.checked ? 'translateX(26px)' : 'translateX(2px)';
+                toggle.parentElement.style.background = checkbox.checked ? 'var(--gradient)' : '#ccc';
+            });
         });
 
         // ============================================
@@ -1498,34 +1429,50 @@
                     throw new Error('Please open from Telegram bot!');
                 }
                 
-                // Save login state
-                localStorage.setItem('telegram_bot_login', 'true');
+                // Check maintenance mode first
+                await checkMaintenance();
                 
-                // Hide login screen with animation
-                document.getElementById('loginScreen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('loginScreen').style.display = 'none';
-                    initializeUser();
-                }, 500);
+                // If no maintenance, proceed with login
+                if (!maintenanceMode) {
+                    await initializeUser(tgUser);
+                }
                 
             } catch (error) {
-                alert(error.message);
+                showToast(error.message, 'danger');
                 loginBtn.innerHTML = '<i class="fab fa-telegram"></i> Login with Telegram';
                 loginBtn.disabled = false;
             }
         }
 
-        async function initializeUser() {
-            // Get user from Telegram
-            const tgUser = tg.initDataUnsafe.user;
-            if (!tgUser) {
-                tg.showAlert('Please open from Telegram bot!');
-                return;
+        async function checkMaintenance() {
+            try {
+                const snapshot = await database.ref('system/maintenance').once('value');
+                const maintenance = snapshot.val();
+                
+                if (maintenance && maintenance.enabled) {
+                    maintenanceMode = true;
+                    document.getElementById('maintenanceMessage').textContent = 
+                        maintenance.message || 'The system is currently under maintenance. Please check back later.';
+                    document.getElementById('maintenanceScreen').style.display = 'flex';
+                    return true;
+                } else {
+                    maintenanceMode = false;
+                    document.getElementById('maintenanceScreen').style.display = 'none';
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error checking maintenance:', error);
+                return false;
             }
-            
+        }
+
+        async function initializeUser(tgUser) {
             userId = tgUser.id.toString();
             const userName = tgUser.username || tgUser.first_name || 'User';
             const userAvatar = tgUser.photo_url || null;
+            
+            // Save user ID to localStorage
+            localStorage.setItem('telegram_bot_user_id', userId);
             
             // Update UI
             document.getElementById('userName').textContent = userName;
@@ -1538,63 +1485,106 @@
                 document.getElementById('profileAvatar').style.display = 'none';
             }
             
+            // Check if user is banned
+            await checkUserBanStatus();
+            
+            if (!userData || userData.banned) {
+                return; // Stop if banned
+            }
+            
             // Check/create user in database
             const userRef = database.ref(`users/${userId}`);
             const snapshot = await userRef.once('value');
             
             if (!snapshot.exists()) {
+                // Get starting balance from settings
+                const settingsSnapshot = await database.ref('games/spin/settings').once('value');
+                const settings = settingsSnapshot.val();
+                const startingBalance = settings ? (settings.startingBalance || 10.00) : 10.00;
+                
                 // Create new user with bonus
                 await userRef.set({
                     username: userName,
-                    balance: 10.00,
+                    balance: startingBalance,
                     joined: Date.now(),
                     lastActive: Date.now(),
                     spinsToday: 0,
                     lastSpin: 0,
                     banned: false,
+                    maintenanceBlocked: false,
                     totalEarned: 0,
                     totalWithdrawn: 0,
                     winCount: 0,
                     totalSpins: 0,
-                    dailyGoal: 20.00,
+                    totalTasks: 0,
                     level: 1,
                     experience: 0
                 });
                 
                 // Show welcome bonus
-                setTimeout(() => {
-                    showNotification('🎉 Welcome! You received $10 bonus!', 'success');
-                }, 1000);
+                showToast(`🎉 Welcome! You received $${startingBalance} bonus!`, 'success');
             }
             
-            // Load user data
+            // Load user data in real-time
             userRef.on('value', (snapshot) => {
-                userData = snapshot.val();
-                if (userData) {
+                const newUserData = snapshot.val();
+                if (newUserData) {
+                    userData = newUserData;
                     updateUserDisplay();
-                    checkAchievements();
+                    
+                    // Check if user got banned while using app
+                    if (userData.banned) {
+                        showBannedScreen();
+                    }
+                    
+                    // Check if maintenance blocked
+                    if (userData.maintenanceBlocked) {
+                        showToast('⚠️ Your account is temporarily blocked from spinning/withdrawing', 'warning');
+                    }
                 }
             });
             
-            // Load game settings
-            loadGameSettings();
-            
             // Load other data
-            loadAllData();
+            await loadAllData();
             
-            // Show app with animation
+            // Hide login screen, show app
+            document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'block';
-            document.getElementById('loadingScreen').style.display = 'none';
             
             isLoggedIn = true;
             
             // Start timers
             startTimers();
+            
+            // Check for daily bonus
+            checkDailyBonus();
+        }
+
+        async function checkUserBanStatus() {
+            try {
+                const snapshot = await database.ref(`users/${userId}`).once('value');
+                userData = snapshot.val();
+                
+                if (userData && userData.banned) {
+                    showBannedScreen();
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error checking ban status:', error);
+                return false;
+            }
+        }
+
+        function showBannedScreen() {
+            document.getElementById('bannedScreen').style.display = 'flex';
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'none';
         }
 
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('telegram_bot_login');
+                localStorage.removeItem('telegram_bot_user_id');
                 window.location.reload();
             }
         }
@@ -1603,52 +1593,35 @@
         // DATA LOADING
         // ============================================
         async function loadAllData() {
-            loadStats();
-            loadTasks();
-            loadNotifications();
-            loadWithdrawHistory();
-            loadAchievements();
-            loadLeaderboard();
-            createWheel();
+            try {
+                await Promise.all([
+                    loadGameSettings(),
+                    loadTasks(),
+                    loadNotifications(),
+                    loadWithdrawHistory(),
+                    createWheel()
+                ]);
+                
+                // Update UI
+                updateUserDisplay();
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showToast('Error loading data', 'danger');
+            }
         }
 
-        function loadStats() {
-            if (!userId) return;
-            
-            // Online Users
-            database.ref('users').once('value', (snapshot) => {
-                let onlineCount = 0;
-                const now = Date.now();
-                snapshot.forEach((childSnapshot) => {
-                    const user = childSnapshot.val();
-                    if (user.lastActive && (now - user.lastActive) < 300000) {
-                        onlineCount++;
-                    }
-                });
-                document.getElementById('onlineCount').textContent = onlineCount;
-            });
-            
-            // Total Payout
-            database.ref('withdrawals').once('value', (snapshot) => {
-                let totalPayout = 0;
-                snapshot.forEach((childSnapshot) => {
-                    const withdrawal = childSnapshot.val();
-                    if (withdrawal.status === 'approved') {
-                        totalPayout += parseFloat(withdrawal.amount) || 0;
-                    }
-                });
-                // Update total payout display if needed
-            });
-        }
-
-        function loadGameSettings() {
-            database.ref('games/spin/settings').once('value', (snapshot) => {
+        async function loadGameSettings() {
+            try {
+                const snapshot = await database.ref('games/spin/settings').once('value');
                 const settings = snapshot.val();
                 if (settings) {
                     winChance = settings.winPercentage || 30;
                     document.getElementById('winChance').textContent = `${winChance}%`;
                 }
-            });
+            } catch (error) {
+                console.error('Error loading game settings:', error);
+            }
         }
 
         function updateUserDisplay() {
@@ -1659,19 +1632,19 @@
             document.getElementById('spinsLeft').textContent = 10 - (userData.spinsToday || 0);
             document.getElementById('totalEarned').textContent = `$${(userData.totalEarned || 0).toFixed(2)}`;
             document.getElementById('totalWithdrawn').textContent = `$${(userData.totalWithdrawn || 0).toFixed(2)}`;
+            document.getElementById('userLevel').textContent = userData.level || 1;
             
             // Calculate win rate
             const winRate = userData.totalSpins > 0 ? 
                 Math.round((userData.winCount / userData.totalSpins) * 100) : 0;
             document.getElementById('winRate').textContent = `${winRate}%`;
-            document.getElementById('profileWinRate').textContent = `${winRate}%`;
             
             // Check spin availability
             checkSpinAvailability();
         }
 
         // ============================================
-        // GAME SYSTEM
+        // GAME SYSTEM (FIXED)
         // ============================================
         function createWheel() {
             const wheel = document.getElementById('wheel');
@@ -1695,23 +1668,19 @@
                 segment.style.setProperty('--color1', reward.color1);
                 segment.style.setProperty('--color2', reward.color2);
                 wheel.appendChild(segment);
-                
-                // Add reward text (optional)
-                const text = document.createElement('div');
-                text.style.position = 'absolute';
-                text.style.top = '50%';
-                text.style.left = '50%';
-                text.style.transform = `rotate(${index * 45 + 22.5}deg) translateY(-100px) rotate(-${index * 45 + 22.5}deg)`;
-                text.style.color = 'white';
-                text.style.fontWeight = 'bold';
-                text.style.fontSize = '12px';
-                text.textContent = `$${reward.value}`;
-                wheel.appendChild(text);
             });
         }
 
         function checkSpinAvailability() {
             if (!userData) return;
+            
+            // Check if banned or maintenance blocked
+            if (userData.banned || userData.maintenanceBlocked) {
+                document.getElementById('spinButton').disabled = true;
+                document.getElementById('spinButton').textContent = userData.banned ? 'BANNED' : 'BLOCKED';
+                isSpinning = true;
+                return;
+            }
             
             const now = Date.now();
             const lastSpin = userData.lastSpin || 0;
@@ -1719,10 +1688,9 @@
             
             // Check daily limit
             if (spinsToday >= 10) {
-                document.getElementById('spinButton').style.background = '#666';
-                document.getElementById('spinButton').textContent = 'LIMIT REACHED';
-                document.getElementById('spinButton').onclick = null;
-                wheelSpinning = true;
+                document.getElementById('spinButton').disabled = true;
+                document.getElementById('spinButton').textContent = 'LIMIT';
+                isSpinning = true;
                 document.getElementById('cooldownTimer').textContent = '24h';
                 return;
             }
@@ -1734,16 +1702,14 @@
             if (timeLeft > 0) {
                 spinCooldown = Math.ceil(timeLeft / 1000);
                 updateSpinTimer();
-                document.getElementById('spinButton').style.background = '#666';
+                document.getElementById('spinButton').disabled = true;
                 document.getElementById('spinButton').textContent = 'WAIT';
-                document.getElementById('spinButton').onclick = null;
-                wheelSpinning = true;
+                isSpinning = true;
             } else {
                 spinCooldown = 0;
-                document.getElementById('spinButton').style.background = 'var(--gradient)';
+                document.getElementById('spinButton').disabled = false;
                 document.getElementById('spinButton').textContent = 'SPIN';
-                document.getElementById('spinButton').onclick = spinWheel;
-                wheelSpinning = false;
+                isSpinning = false;
                 document.getElementById('cooldownTimer').textContent = 'Ready';
             }
         }
@@ -1762,20 +1728,25 @@
         }
 
         async function spinWheel() {
-            if (wheelSpinning || !userData) return;
+            if (isSpinning || !userData) return;
+            
+            // Check if banned or maintenance blocked
+            if (userData.banned || userData.maintenanceBlocked) {
+                showToast(userData.banned ? 'Account banned!' : 'Account blocked from spinning', 'danger');
+                return;
+            }
             
             // Check mandatory tasks
             const mandatoryCompleted = await checkMandatoryTasks();
             if (!mandatoryCompleted) {
-                showNotification('⚠️ Complete mandatory tasks first!', 'warning');
-                document.getElementById('tasksSection').style.display = 'block';
+                showToast('Complete mandatory tasks first!', 'warning');
                 showSection('tasks');
                 return;
             }
             
-            wheelSpinning = true;
+            isSpinning = true;
             const spinBtn = document.getElementById('spinButton');
-            spinBtn.style.background = '#666';
+            spinBtn.disabled = true;
             spinBtn.textContent = 'SPINNING...';
             
             // Determine win/loss
@@ -1794,33 +1765,48 @@
             
             // Update user data after animation
             setTimeout(async () => {
-                const newBalance = userData.balance + reward;
-                const updates = {
-                    balance: newBalance,
-                    spinsToday: (userData.spinsToday || 0) + 1,
-                    lastSpin: Date.now(),
-                    totalSpins: (userData.totalSpins || 0) + 1
-                };
-                
-                if (isWin) {
-                    updates.winCount = (userData.winCount || 0) + 1;
-                    updates.totalEarned = (userData.totalEarned || 0) + reward;
+                try {
+                    const newBalance = userData.balance + reward;
+                    const updates = {
+                        balance: newBalance,
+                        spinsToday: (userData.spinsToday || 0) + 1,
+                        lastSpin: Date.now(),
+                        lastActive: Date.now(),
+                        totalSpins: (userData.totalSpins || 0) + 1
+                    };
+                    
+                    if (isWin) {
+                        updates.winCount = (userData.winCount || 0) + 1;
+                        updates.totalEarned = (userData.totalEarned || 0) + reward;
+                    }
+                    
+                    await database.ref(`users/${userId}`).update(updates);
+                    
+                    // Save result
+                    const resultId = Date.now().toString();
+                    await database.ref(`games/spin/results/${resultId}`).set({
+                        userId: userId,
+                        win: isWin,
+                        amount: reward,
+                        timestamp: Date.now()
+                    });
+                    
+                    // Show result
+                    showSpinResult(isWin, reward);
+                    
+                    // Update display
+                    updateUserDisplay();
+                    
+                } catch (error) {
+                    console.error('Error updating spin result:', error);
+                    showToast('Error processing spin', 'danger');
                 }
                 
-                await database.ref(`users/${userId}`).update(updates);
+                // Reset spin button
+                setTimeout(() => {
+                    checkSpinAvailability();
+                }, 2000);
                 
-                // Save result
-                const resultId = Date.now().toString();
-                await database.ref(`games/spin/results/${resultId}`).set({
-                    userId: userId,
-                    win: isWin,
-                    amount: reward,
-                    timestamp: Date.now()
-                });
-                
-                // Show result
-                showSpinResult(isWin, reward);
-                checkSpinAvailability();
             }, 4000);
         }
 
@@ -1838,9 +1824,6 @@
                 message.textContent = 'You won the spin!';
                 resultAmount.textContent = `+$${amount.toFixed(2)}`;
                 resultAmount.style.color = 'var(--success)';
-                
-                // Check for achievements
-                checkSpinAchievements();
             } else {
                 icon.textContent = '😢';
                 title.textContent = 'Try Again!';
@@ -1850,11 +1833,11 @@
                 resultAmount.style.color = 'var(--danger)';
             }
             
-            modal.style.display = 'flex';
+            modal.classList.add('active');
         }
 
         function closeResultModal() {
-            document.getElementById('resultModal').style.display = 'none';
+            document.getElementById('resultModal').classList.remove('active');
         }
 
         function shareResult() {
@@ -1866,16 +1849,17 @@
                 });
             } else {
                 navigator.clipboard.writeText(`I won $${userData.balance.toFixed(2)} on Game Bot!`);
-                showNotification('Result copied to clipboard!', 'success');
+                showToast('Result copied to clipboard!', 'success');
             }
             closeResultModal();
         }
 
         // ============================================
-        // TASK SYSTEM
+        // TASK SYSTEM (FIXED)
         // ============================================
         async function loadTasks() {
-            database.ref('tasks').once('value', (snapshot) => {
+            try {
+                const snapshot = await database.ref('tasks').once('value');
                 tasks = [];
                 const tasksList = document.getElementById('tasksList');
                 tasksList.innerHTML = '';
@@ -1910,7 +1894,10 @@
                 });
                 
                 document.getElementById('tasksCompleted').textContent = `${completedCount}/${totalCount}`;
-            });
+                
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+            }
         }
 
         function getTaskIcon(type) {
@@ -1926,25 +1913,34 @@
         async function checkTaskCompletion(taskId) {
             if (!userId) return;
             
-            database.ref(`userTasks/${userId}/${taskId}`).once('value', (snapshot) => {
+            try {
+                const snapshot = await database.ref(`userTasks/${userId}/${taskId}`).once('value');
                 const taskData = snapshot.val();
                 const btn = document.getElementById(`taskBtn-${taskId}`);
                 
                 if (taskData && taskData.completed) {
                     btn.innerHTML = '<i class="fas fa-check"></i> Completed';
-                    btn.className = 'task-btn completed';
                     btn.disabled = true;
                     
                     // Update completed count
                     const completedText = document.getElementById('tasksCompleted').textContent;
                     const [completed, total] = completedText.split('/').map(Number);
                     document.getElementById('tasksCompleted').textContent = `${completed + 1}/${total}`;
+                    document.getElementById('tasksDone').textContent = completed + 1;
                 }
-            });
+            } catch (error) {
+                console.error('Error checking task completion:', error);
+            }
         }
 
         async function completeTask(taskId) {
-            if (!userId) return;
+            if (!userId || !userData) return;
+            
+            // Check if banned
+            if (userData.banned) {
+                showToast('Account banned!', 'danger');
+                return;
+            }
             
             const task = tasks.find(t => t.id === taskId);
             if (!task) return;
@@ -1953,59 +1949,84 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing';
             btn.disabled = true;
             
-            // Simulate task completion
-            setTimeout(async () => {
-                await database.ref(`userTasks/${userId}/${taskId}`).set({
-                    completed: true,
-                    completedAt: Date.now(),
-                    reward: task.reward
-                });
+            try {
+                // Simulate task completion (in real app, verify with APIs)
+                setTimeout(async () => {
+                    await database.ref(`userTasks/${userId}/${taskId}`).set({
+                        completed: true,
+                        completedAt: Date.now(),
+                        reward: task.reward
+                    });
+                    
+                    // Add reward to balance
+                    const newBalance = (userData.balance || 0) + task.reward;
+                    await database.ref(`users/${userId}`).update({
+                        balance: newBalance,
+                        totalEarned: (userData.totalEarned || 0) + task.reward,
+                        totalTasks: (userData.totalTasks || 0) + 1,
+                        lastActive: Date.now()
+                    });
+                    
+                    btn.innerHTML = '<i class="fas fa-check"></i> Completed';
+                    btn.disabled = true;
+                    
+                    showToast(`✅ Task completed! +$${task.reward}`, 'success');
+                    
+                    // Check if spins should be enabled
+                    checkSpinAvailability();
+                    
+                }, 2000);
                 
-                // Add reward to balance
-                const newBalance = (userData.balance || 0) + task.reward;
-                await database.ref(`users/${userId}/balance`).set(newBalance);
-                
-                // Update total earned
-                await database.ref(`users/${userId}/totalEarned`).transaction(total => {
-                    return (total || 0) + task.reward;
-                });
-                
-                btn.innerHTML = '<i class="fas fa-check"></i> Completed';
-                btn.className = 'task-btn completed';
-                
-                showNotification(`✅ Task completed! +$${task.reward}`, 'success');
-                
-                // Check achievements
-                checkTaskAchievements();
-            }, 2000);
+            } catch (error) {
+                console.error('Error completing task:', error);
+                btn.innerHTML = '<i class="fas fa-play"></i> Start';
+                btn.disabled = false;
+                showToast('Error completing task', 'danger');
+            }
         }
 
         async function checkMandatoryTasks() {
-            if (!userId) return;
+            if (!userId) return true; // Temporarily disabled for testing
             
-            const userTasksSnapshot = await database.ref(`userTasks/${userId}`).once('value');
-            const userTasks = userTasksSnapshot.val() || {};
-            
-            const tasksSnapshot = await database.ref('tasks').once('value');
-            let allMandatoryCompleted = true;
-            
-            tasksSnapshot.forEach((childSnapshot) => {
-                const task = childSnapshot.val();
-                if (task.mandatory) {
-                    if (!userTasks[childSnapshot.key] || !userTasks[childSnapshot.key].completed) {
-                        allMandatoryCompleted = false;
+            try {
+                const userTasksSnapshot = await database.ref(`userTasks/${userId}`).once('value');
+                const userTasks = userTasksSnapshot.val() || {};
+                
+                const tasksSnapshot = await database.ref('tasks').once('value');
+                let allMandatoryCompleted = true;
+                
+                tasksSnapshot.forEach((childSnapshot) => {
+                    const task = childSnapshot.val();
+                    if (task.mandatory) {
+                        if (!userTasks[childSnapshot.key] || !userTasks[childSnapshot.key].completed) {
+                            allMandatoryCompleted = false;
+                        }
                     }
-                }
-            });
-            
-            return allMandatoryCompleted;
+                });
+                
+                return allMandatoryCompleted;
+            } catch (error) {
+                console.error('Error checking mandatory tasks:', error);
+                return true; // Return true on error to not block users
+            }
         }
 
         // ============================================
-        // WITHDRAWAL SYSTEM
+        // WITHDRAWAL SYSTEM (FIXED)
         // ============================================
         async function submitWithdrawal() {
             if (!userId || !userData) return;
+            
+            // Check if banned or maintenance blocked
+            if (userData.banned) {
+                showToast('Account banned!', 'danger');
+                return;
+            }
+            
+            if (userData.maintenanceBlocked) {
+                showToast('Withdrawals temporarily blocked', 'warning');
+                return;
+            }
             
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
             const method = document.getElementById('withdrawMethod').value;
@@ -2014,22 +2035,22 @@
             // Validation
             const minAmount = 10;
             if (!amount || amount < minAmount) {
-                showNotification(`Minimum withdrawal is $${minAmount}!`, 'warning');
+                showToast(`Minimum withdrawal is $${minAmount}!`, 'warning');
                 return;
             }
             
             if (amount > userData.balance) {
-                showNotification('Insufficient balance!', 'danger');
+                showToast('Insufficient balance!', 'danger');
                 return;
             }
             
             if (!method) {
-                showNotification('Select payment method!', 'warning');
+                showToast('Select payment method!', 'warning');
                 return;
             }
             
             if (!details) {
-                showNotification('Enter account details!', 'warning');
+                showToast('Enter account details!', 'warning');
                 return;
             }
             
@@ -2051,22 +2072,9 @@
                 
                 // Deduct from balance
                 const newBalance = userData.balance - amount;
-                await database.ref(`users/${userId}/balance`).set(newBalance);
-                
-                // Update total withdrawn
-                await database.ref(`users/${userId}/totalWithdrawn`).transaction(total => {
-                    return (total || 0) + amount;
-                });
-                
-                // Send notification to admin
-                await database.ref(`notifications/admin/${withdrawalId}`).set({
-                    type: 'withdrawal',
-                    userId: userId,
-                    username: userData.username,
-                    amount: amount,
-                    message: 'New withdrawal request',
-                    timestamp: Date.now(),
-                    read: false
+                await database.ref(`users/${userId}`).update({
+                    balance: newBalance,
+                    lastActive: Date.now()
                 });
                 
                 btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Request';
@@ -2075,22 +2083,23 @@
                 document.getElementById('withdrawAmount').value = '';
                 document.getElementById('withdrawDetails').value = '';
                 
-                showNotification('✅ Withdrawal request submitted!', 'success');
+                showToast('✅ Withdrawal request submitted!', 'success');
                 loadWithdrawHistory();
                 
             } catch (error) {
                 btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Request';
                 btn.disabled = false;
-                showNotification('Error submitting request!', 'danger');
+                showToast('Error submitting request', 'danger');
             }
         }
 
         async function loadWithdrawHistory() {
             if (!userId) return;
             
-            database.ref('withdrawals').orderByChild('userId').equalTo(userId).once('value', (snapshot) => {
-                const historyTable = document.getElementById('withdrawHistory');
-                historyTable.innerHTML = '';
+            try {
+                const snapshot = await database.ref('withdrawals').orderByChild('userId').equalTo(userId).once('value');
+                const historyDiv = document.getElementById('withdrawHistory');
+                historyDiv.innerHTML = '';
                 
                 const withdrawals = [];
                 snapshot.forEach((childSnapshot) => {
@@ -2102,38 +2111,48 @@
                 
                 // Show last 5
                 withdrawals.slice(0, 5).forEach(withdrawal => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${new Date(withdrawal.timestamp).toLocaleDateString()}</td>
-                        <td>$${withdrawal.amount.toFixed(2)}</td>
-                        <td>
-                            <span class="badge" style="
-                                background: ${withdrawal.status === 'approved' ? 'rgba(0,255,136,0.2)' : 
-                                            withdrawal.status === 'rejected' ? 'rgba(255,85,85,0.2)' : 
-                                            'rgba(255,170,0,0.2)'};
-                                color: ${withdrawal.status === 'approved' ? 'var(--success)' : 
-                                       withdrawal.status === 'rejected' ? 'var(--danger)' : 
-                                       'var(--warning)'};
+                    const historyItem = document.createElement('div');
+                    historyItem.style.padding = '10px';
+                    historyItem.style.borderBottom = '1px solid var(--border)';
+                    historyItem.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: 600;">$${withdrawal.amount.toFixed(2)}</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">
+                                    ${new Date(withdrawal.timestamp).toLocaleDateString()}
+                                </div>
+                            </div>
+                            <span style="
                                 padding: 3px 8px;
                                 border-radius: 10px;
                                 font-size: 12px;
+                                background: ${withdrawal.status === 'approved' ? 'rgba(0,255,136,0.2)' : 
+                                           withdrawal.status === 'rejected' ? 'rgba(255,85,85,0.2)' : 
+                                           'rgba(255,170,0,0.2)'};
+                                color: ${withdrawal.status === 'approved' ? 'var(--success)' : 
+                                       withdrawal.status === 'rejected' ? 'var(--danger)' : 
+                                       'var(--warning)'};
                             ">
                                 ${withdrawal.status}
                             </span>
-                        </td>
+                        </div>
                     `;
-                    historyTable.appendChild(row);
+                    historyDiv.appendChild(historyItem);
                 });
-            });
+                
+            } catch (error) {
+                console.error('Error loading withdrawal history:', error);
+            }
         }
 
         // ============================================
-        // NOTIFICATION SYSTEM
+        // NOTIFICATION SYSTEM (FIXED)
         // ============================================
         async function loadNotifications() {
             if (!userId) return;
             
-            database.ref(`notifications/${userId}`).orderByChild('timestamp').once('value', (snapshot) => {
+            try {
+                const snapshot = await database.ref(`notifications/${userId}`).orderByChild('timestamp').once('value');
                 notifications = [];
                 const notificationsList = document.getElementById('notificationsList');
                 notificationsList.innerHTML = '';
@@ -2181,7 +2200,10 @@
                 document.getElementById('notificationBadge').textContent = unreadCount;
                 document.getElementById('navNotificationBadge').textContent = unreadCount;
                 document.getElementById('navNotificationBadge').style.display = unreadCount > 0 ? 'block' : 'none';
-            });
+                
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
         }
 
         function getNotificationIcon(type) {
@@ -2190,7 +2212,9 @@
                 'reward': '🎁',
                 'withdrawal': '💳',
                 'achievement': '🏆',
-                'system': '⚙️'
+                'system': '⚙️',
+                'balance_add': '💰',
+                'balance_deduct': '💸'
             };
             return icons[type] || '📧';
         }
@@ -2200,8 +2224,10 @@
                 'broadcast': 'Announcement',
                 'reward': 'Reward Available',
                 'withdrawal': 'Withdrawal Update',
-                'achievement': 'Achievement Unlocked',
-                'system': 'System Notification'
+                'achievement': 'Achievement',
+                'system': 'System',
+                'balance_add': 'Balance Added',
+                'balance_deduct': 'Balance Deducted'
             };
             return titles[type] || 'Notification';
         }
@@ -2224,205 +2250,65 @@
             document.getElementById('rewardAmount').textContent = `$${notification.amount}`;
             currentRewardId = notificationId;
             
-            document.getElementById('rewardModal').style.display = 'flex';
+            document.getElementById('rewardModal').classList.add('active');
         }
 
         async function claimReward() {
             if (!currentRewardId || !userId) return;
             
-            const notification = notifications.find(n => n.id === currentRewardId);
-            if (!notification) return;
-            
-            // Get reward from rewards collection
-            const rewardSnapshot = await database.ref(`rewards/${currentRewardId}`).once('value');
-            const reward = rewardSnapshot.val();
-            
-            if (!reward || reward.claimed) {
-                showNotification('Reward already claimed!', 'warning');
-                return;
+            try {
+                const notification = notifications.find(n => n.id === currentRewardId);
+                if (!notification) return;
+                
+                // Mark notification as read and claimed
+                await database.ref(`notifications/${userId}/${currentRewardId}`).update({
+                    read: true,
+                    claimed: true
+                });
+                
+                // Add reward to balance
+                const newBalance = (userData.balance || 0) + notification.amount;
+                await database.ref(`users/${userId}`).update({
+                    balance: newBalance,
+                    totalEarned: (userData.totalEarned || 0) + notification.amount,
+                    lastActive: Date.now()
+                });
+                
+                showToast(`🎉 Reward claimed! +$${notification.amount}`, 'success');
+                closeRewardModal();
+                loadNotifications();
+                
+            } catch (error) {
+                console.error('Error claiming reward:', error);
+                showToast('Error claiming reward', 'danger');
             }
-            
-            // Mark as claimed
-            await database.ref(`rewards/${currentRewardId}/claimed`).set(true);
-            await database.ref(`notifications/${userId}/${currentRewardId}/claimed`).set(true);
-            await database.ref(`notifications/${userId}/${currentRewardId}/read`).set(true);
-            
-            // Add to balance
-            const newBalance = (userData.balance || 0) + reward.amount;
-            await database.ref(`users/${userId}`).update({
-                balance: newBalance,
-                totalEarned: (userData.totalEarned || 0) + reward.amount
-            });
-            
-            showNotification(`🎉 Reward claimed! +$${reward.amount}`, 'success');
-            closeRewardModal();
-            loadNotifications();
         }
 
         function closeRewardModal() {
-            document.getElementById('rewardModal').style.display = 'none';
+            document.getElementById('rewardModal').classList.remove('active');
             currentRewardId = null;
         }
 
         async function markAllAsRead() {
             if (!userId) return;
             
-            const updates = {};
-            notifications.forEach(notification => {
-                if (!notification.read) {
-                    updates[`notifications/${userId}/${notification.id}/read`] = true;
-                }
-            });
-            
-            if (Object.keys(updates).length > 0) {
-                await database.ref().update(updates);
-                document.getElementById('navNotificationBadge').style.display = 'none';
-                document.getElementById('notificationBadge').textContent = '0';
-                loadNotifications();
-            }
-        }
-
-        // ============================================
-        // ACHIEVEMENT SYSTEM
-        // ============================================
-        async function loadAchievements() {
-            // Predefined achievements
-            achievements = [
-                { id: 'first_spin', title: 'First Spin', reward: 1.00, icon: 'fa-play', 
-                  condition: (user) => user.totalSpins >= 1 },
-                { id: 'five_spins', title: 'Spin Master', reward: 5.00, icon: 'fa-gamepad', 
-                  condition: (user) => user.totalSpins >= 5 },
-                { id: 'first_win', title: 'First Win', reward: 2.00, icon: 'fa-trophy', 
-                  condition: (user) => user.winCount >= 1 },
-                { id: 'five_wins', title: 'Lucky Player', reward: 10.00, icon: 'fa-star', 
-                  condition: (user) => user.winCount >= 5 },
-                { id: 'first_task', title: 'Task Starter', reward: 1.00, icon: 'fa-tasks', 
-                  condition: (user) => user.totalTasks >= 1 },
-                { id: 'balance_50', title: 'Rich Player', reward: 5.00, icon: 'fa-money-bill-wave', 
-                  condition: (user) => user.balance >= 50 },
-                { id: 'daily_goal', title: 'Goal Achiever', reward: 3.00, icon: 'fa-bullseye', 
-                  condition: (user) => user.totalEarned >= (user.dailyGoal || 20) }
-            ];
-            
-            // Check achievements for current user
-            checkAchievements();
-        }
-
-        async function checkAchievements() {
-            if (!userId || !userData) return;
-            
-            // Get user's unlocked achievements
-            const userAchievementsSnapshot = await database.ref(`userAchievements/${userId}`).once('value');
-            const userAchievements = userAchievementsSnapshot.val() || {};
-            
-            // Check each achievement
-            achievements.forEach(async (achievement) => {
-                if (!userAchievements[achievement.id] && achievement.condition(userData)) {
-                    // Unlock achievement
-                    await unlockAchievement(achievement);
-                }
-            });
-        }
-
-        async function checkSpinAchievements() {
-            if (!userData) return;
-            
-            // Check for spin-related achievements
-            if (userData.totalSpins === 1) {
-                const achievement = achievements.find(a => a.id === 'first_spin');
-                if (achievement) await unlockAchievement(achievement);
-            }
-            
-            if (userData.totalSpins === 5) {
-                const achievement = achievements.find(a => a.id === 'five_spins');
-                if (achievement) await unlockAchievement(achievement);
-            }
-            
-            if (userData.winCount === 1) {
-                const achievement = achievements.find(a => a.id === 'first_win');
-                if (achievement) await unlockAchievement(achievement);
-            }
-            
-            if (userData.winCount === 5) {
-                const achievement = achievements.find(a => a.id === 'five_wins');
-                if (achievement) await unlockAchievement(achievement);
-            }
-        }
-
-        async function checkTaskAchievements() {
-            // Count completed tasks
-            const userTasksSnapshot = await database.ref(`userTasks/${userId}`).once('value');
-            const completedTasks = userTasksSnapshot.numChildren();
-            
-            if (completedTasks === 1) {
-                const achievement = achievements.find(a => a.id === 'first_task');
-                if (achievement) await unlockAchievement(achievement);
-            }
-        }
-
-        async function unlockAchievement(achievement) {
-            if (!userId) return;
-            
-            // Mark as unlocked
-            await database.ref(`userAchievements/${userId}/${achievement.id}`).set({
-                unlockedAt: Date.now(),
-                reward: achievement.reward
-            });
-            
-            // Add reward to balance
-            const newBalance = (userData.balance || 0) + achievement.reward;
-            await database.ref(`users/${userId}`).update({
-                balance: newBalance,
-                totalEarned: (userData.totalEarned || 0) + achievement.reward
-            });
-            
-            // Show achievement modal
-            showAchievementModal(achievement);
-            
-            // Send notification
-            await database.ref(`notifications/${userId}/${Date.now()}`).set({
-                type: 'achievement',
-                message: `Achievement unlocked: ${achievement.title}`,
-                amount: achievement.reward,
-                timestamp: Date.now(),
-                read: false
-            });
-        }
-
-        function showAchievementModal(achievement) {
-            document.getElementById('achievementMessage').textContent = 
-                `You unlocked the "${achievement.title}" achievement!`;
-            document.getElementById('achievementReward').textContent = `+$${achievement.reward}`;
-            document.getElementById('achievementModal').style.display = 'flex';
-        }
-
-        function closeAchievementModal() {
-            document.getElementById('achievementModal').style.display = 'none';
-        }
-
-        // ============================================
-        // LEADERBOARD
-        // ============================================
-        async function loadLeaderboard() {
-            database.ref('users').once('value', (snapshot) => {
-                const leaderboard = [];
-                snapshot.forEach((childSnapshot) => {
-                    const user = childSnapshot.val();
-                    if (user.balance > 0) {
-                        leaderboard.push({
-                            id: childSnapshot.key,
-                            username: user.username,
-                            balance: user.balance
-                        });
+            try {
+                const updates = {};
+                notifications.forEach(notification => {
+                    if (!notification.read) {
+                        updates[`notifications/${userId}/${notification.id}/read`] = true;
                     }
                 });
                 
-                // Sort by balance descending
-                leaderboard.sort((a, b) => b.balance - a.balance);
-                
-                // Display top 10
-                // (You can add a leaderboard section in HTML to show this)
-            });
+                if (Object.keys(updates).length > 0) {
+                    await database.ref().update(updates);
+                    document.getElementById('navNotificationBadge').style.display = 'none';
+                    document.getElementById('notificationBadge').textContent = '0';
+                    loadNotifications();
+                }
+            } catch (error) {
+                console.error('Error marking all as read:', error);
+            }
         }
 
         // ============================================
@@ -2431,98 +2317,84 @@
         function showSection(sectionId) {
             // Hide all sections
             document.querySelectorAll('.content-section').forEach(section => {
-                section.style.display = 'none';
+                section.classList.remove('active');
             });
             
             // Show selected section
-            document.getElementById(`${sectionId}Section`).style.display = 'block';
+            document.getElementById(`${sectionId}Section`).classList.add('active');
             
             // Update active nav
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
-                if (item.getAttribute('href') === `#${sectionId}`) {
-                    item.classList.add('active');
-                }
             });
             
-            // Mark notifications as read when viewing
+            // Set active based on section
+            const navMap = {
+                'game': 0,
+                'tasks': 1,
+                'withdraw': 2,
+                'notifications': 3,
+                'profile': 4
+            };
+            
+            if (navMap[sectionId] !== undefined) {
+                document.querySelectorAll('.nav-item')[navMap[sectionId]].classList.add('active');
+            }
+            
+            // Load data for specific sections
             if (sectionId === 'notifications') {
                 markAllAsRead();
+            } else if (sectionId === 'withdraw') {
+                loadWithdrawHistory();
             }
         }
 
         function showProfileModal() {
-            document.getElementById('profileModal').style.display = 'flex';
+            document.getElementById('profileModal').classList.add('active');
         }
 
         function closeProfileModal() {
-            document.getElementById('profileModal').style.display = 'none';
+            document.getElementById('profileModal').classList.remove('active');
         }
 
         async function saveSettings() {
-            const spinLimit = document.getElementById('userSpinLimit').value;
-            const soundEnabled = document.getElementById('soundEnabled').checked;
-            const notificationsEnabled = document.getElementById('notificationsEnabled').checked;
-            const theme = document.getElementById('themeSelect').value;
-            
-            // Save to localStorage
-            localStorage.setItem('userSettings', JSON.stringify({
-                spinLimit,
-                soundEnabled,
-                notificationsEnabled,
-                theme
-            }));
-            
-            showNotification('Settings saved!', 'success');
-            closeProfileModal();
-        }
-
-        async function saveProfileSettings() {
             const dailyGoal = parseFloat(document.getElementById('dailyGoal').value);
             
             if (dailyGoal && dailyGoal > 0) {
-                await database.ref(`users/${userId}/dailyGoal`).set(dailyGoal);
-                showNotification('Daily goal saved!', 'success');
+                try {
+                    await database.ref(`users/${userId}/dailyGoal`).set(dailyGoal);
+                    showToast('Daily goal saved!', 'success');
+                    closeProfileModal();
+                } catch (error) {
+                    showToast('Error saving settings', 'danger');
+                }
             }
         }
 
-        function showAllTasks() {
-            // You can implement a modal or page showing all tasks
-            showNotification('Showing all available tasks!', 'info');
-        }
-
-        function showNotification(message, type = 'info') {
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.className = 'notification-item';
-            notification.style.position = 'fixed';
-            notification.style.top = '20px';
-            notification.style.right = '20px';
-            notification.style.zIndex = '3000';
-            notification.style.animation = 'slideIn 0.3s ease';
-            notification.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 40px; height: 40px; background: ${
-                        type === 'success' ? 'var(--success)' : 
-                        type === 'danger' ? 'var(--danger)' : 
-                        type === 'warning' ? 'var(--warning)' : 'var(--primary)'
-                    }; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-${
-                            type === 'success' ? 'check' : 
-                            type === 'danger' ? 'times' : 
-                            type === 'warning' ? 'exclamation' : 'info'
-                        }"></i>
-                    </div>
-                    <div>${message}</div>
+        // ============================================
+        // TOAST NOTIFICATIONS
+        // ============================================
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    ${type === 'success' ? '✅' : 
+                      type === 'warning' ? '⚠️' : 
+                      type === 'danger' ? '❌' : 'ℹ️'}
                 </div>
+                <div>${message}</div>
             `;
             
-            document.body.appendChild(notification);
+            document.getElementById('toastContainer').appendChild(toast);
             
-            // Remove after 3 seconds
             setTimeout(() => {
-                notification.style.animation = 'fadeOut 0.3s ease';
-                setTimeout(() => notification.remove(), 300);
+                toast.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
 
@@ -2530,124 +2402,89 @@
         // TIMERS & UPDATES
         // ============================================
         function startTimers() {
-            // Update user online status every minute
+            // Update online status every minute
             setInterval(updateOnlineStatus, 60000);
             
-            // Update stats every 30 seconds
-            setInterval(() => {
-                if (isLoggedIn) {
-                    loadStats();
-                    updateUserDisplay();
-                }
-            }, 30000);
-            
-            // Check for new notifications every minute
+            // Check for new notifications every 30 seconds
             setInterval(() => {
                 if (isLoggedIn) {
                     loadNotifications();
                 }
-            }, 60000);
+            }, 30000);
+            
+            // Check maintenance mode every 2 minutes
+            setInterval(checkMaintenance, 120000);
         }
 
         async function updateOnlineStatus() {
             if (userId) {
-                await database.ref(`users/${userId}/lastActive`).set(Date.now());
+                try {
+                    await database.ref(`users/${userId}/lastActive`).set(Date.now());
+                } catch (error) {
+                    console.error('Error updating online status:', error);
+                }
             }
         }
 
         // ============================================
-        // TELEGRAM WEB APP INTEGRATION
+        // DAILY BONUS
+        // ============================================
+        async function checkDailyBonus() {
+            if (!userId) return;
+            
+            try {
+                const today = new Date().toDateString();
+                const lastBonus = localStorage.getItem(`daily_bonus_${userId}`);
+                
+                if (lastBonus !== today) {
+                    // Give daily bonus
+                    const bonus = 1.00;
+                    const newBalance = (userData.balance || 0) + bonus;
+                    await database.ref(`users/${userId}`).update({
+                        balance: newBalance,
+                        totalEarned: (userData.totalEarned || 0) + bonus,
+                        lastActive: Date.now()
+                    });
+                    
+                    localStorage.setItem(`daily_bonus_${userId}`, today);
+                    showToast(`🎁 Daily bonus: +$${bonus}`, 'success');
+                }
+            } catch (error) {
+                console.error('Error giving daily bonus:', error);
+            }
+        }
+
+        // ============================================
+        // TELEGRAM INTEGRATION
         // ============================================
         tg.ready();
         tg.expand();
         tg.enableClosingConfirmation();
-
-        // Set theme colors
         tg.setHeaderColor('#0a0a14');
         tg.setBackgroundColor('#050510');
 
         // Handle back button
         tg.BackButton.onClick(() => {
-            if (document.getElementById('resultModal').style.display === 'flex') {
+            if (document.getElementById('resultModal').classList.contains('active')) {
                 closeResultModal();
-            } else if (document.getElementById('rewardModal').style.display === 'flex') {
+            } else if (document.getElementById('rewardModal').classList.contains('active')) {
                 closeRewardModal();
+            } else if (document.getElementById('profileModal').classList.contains('active')) {
+                closeProfileModal();
             } else {
                 tg.close();
             }
         });
 
-        // ============================================
-        // ADDITIONAL FEATURES
-        // ============================================
-        
-        // Daily Bonus System
-        async function checkDailyBonus() {
-            if (!userId) return;
-            
-            const today = new Date().toDateString();
-            const lastBonus = localStorage.getItem(`daily_bonus_${userId}`);
-            
-            if (lastBonus !== today) {
-                // Give daily bonus
-                const bonus = 1.00; // $1 daily bonus
-                const newBalance = (userData.balance || 0) + bonus;
-                await database.ref(`users/${userId}`).update({
-                    balance: newBalance,
-                    totalEarned: (userData.totalEarned || 0) + bonus
-                });
-                
-                localStorage.setItem(`daily_bonus_${userId}`, today);
-                showNotification(`🎁 Daily bonus: +$${bonus}`, 'success');
-            }
-        }
-
-        // Referral System
-        async function checkReferral() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const referralCode = urlParams.get('ref');
-            
-            if (referralCode && !localStorage.getItem('referral_used')) {
-                // Add referral bonus
-                const bonus = 5.00;
-                const newBalance = (userData.balance || 0) + bonus;
-                await database.ref(`users/${userId}`).update({
-                    balance: newBalance,
-                    totalEarned: (userData.totalEarned || 0) + bonus
-                });
-                
-                localStorage.setItem('referral_used', 'true');
-                showNotification(`👥 Referral bonus: +$${bonus}`, 'success');
-            }
-        }
-
-        // Level System
-        async function updateLevel() {
-            if (!userData) return;
-            
-            const expNeeded = userData.level * 100;
-            if (userData.experience >= expNeeded) {
-                const newLevel = userData.level + 1;
-                const levelBonus = newLevel * 5;
-                
-                await database.ref(`users/${userId}`).update({
-                    level: newLevel,
-                    experience: userData.experience - expNeeded,
-                    balance: (userData.balance || 0) + levelBonus,
-                    totalEarned: (userData.totalEarned || 0) + levelBonus
-                });
-                
-                showNotification(`🌟 Level Up! You reached level ${newLevel} and got $${levelBonus} bonus!`, 'success');
-            }
-        }
-
-        // Auto-run functions when user logs in
-        setTimeout(() => {
-            if (isLoggedIn) {
-                checkDailyBonus();
-                checkReferral();
-            }
-        }, 3000);
+        // Show back button when in modals
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    tg.BackButton.show();
+                }
+            });
+        });
     </script>
 </body>
 </html>
